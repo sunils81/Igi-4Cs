@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
-    // Auto-sync country code when country changes
+    // Auto-sync country code + show/hide city field when country changes
     const countryCodeMap = {
         'India': '+91', 'Belgium': '+32', 'USA': '+1', 'UAE': '+971',
         'China': '+86', 'Hong Kong': '+852', 'UK': '+44',
@@ -111,10 +111,37 @@ document.addEventListener('DOMContentLoaded', () => {
         'Japan': '+81', 'Israel': '+972', 'Thailand': '+66',
         'Turkey': '+90', 'Italy': '+39', 'South Africa': '+27'
     };
+
+    function updateCityField(country) {
+        const cityGroup = document.getElementById('city-group');
+        const cityLabel = document.getElementById('city-label');
+        const cityInput = document.getElementById('city');
+
+        if (!country || country === '') {
+            cityGroup.style.display = 'none';
+            cityInput.required = false;
+            cityInput.value = '';
+        } else if (country === 'India') {
+            cityGroup.style.display = 'flex';
+            cityLabel.textContent = 'City *';
+            cityInput.placeholder = 'e.g. Mumbai, Delhi, Surat...';
+            cityInput.required = true;
+        } else {
+            cityGroup.style.display = 'flex';
+            cityLabel.textContent = 'State / Region (optional)';
+            cityInput.placeholder = 'e.g. California, Dubai Marina...';
+            cityInput.required = false;
+        }
+    }
+
+    // Trigger on page load for default (India)
+    updateCityField(els.country.value);
+
     els.country.addEventListener('change', () => {
         const code = countryCodeMap[els.country.value];
         if (code) els.countryCode.value = code;
         else els.countryCode.value = 'other';
+        updateCityField(els.country.value);
     });
 
     els.startBtn.addEventListener('click', handleStart);
@@ -133,6 +160,12 @@ function handleStart() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
         alert('Please enter a valid email address.');
+        return;
+    }
+
+    const country = els.country.value || 'India';
+    if (country === 'India' && !els.city.value.trim()) {
+        alert('Please enter your city.');
         return;
     }
 

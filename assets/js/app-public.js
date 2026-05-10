@@ -105,10 +105,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Auto-sync country code when country changes
     const countryCodeMap = {
-        'India': '+91', 'USA': '+1', 'UAE': '+971', 'UK': '+44',
+        'India': '+91', 'Belgium': '+32', 'USA': '+1', 'UAE': '+971',
+        'China': '+86', 'Hong Kong': '+852', 'UK': '+44',
         'Singapore': '+65', 'Australia': '+61', 'Canada': '+1-CA',
-        'Belgium': '+32', 'Hong Kong': '+852', 'Israel': '+972',
-        'Japan': '+81', 'Thailand': '+66', 'South Africa': '+27'
+        'Japan': '+81', 'Israel': '+972', 'Thailand': '+66',
+        'Turkey': '+90', 'Italy': '+39', 'South Africa': '+27'
     };
     els.country.addEventListener('change', () => {
         const code = countryCodeMap[els.country.value];

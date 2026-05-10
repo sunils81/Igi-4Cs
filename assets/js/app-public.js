@@ -3,7 +3,7 @@
 // ============ CONFIG ============
 const QUIZ_DURATION_SECONDS = 5 * 60; // 5 minutes
 const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwZVl7J17oCnq_A4N8PbvGHdUOcqKe5eItx-ZA0fhSX9d6A1tEtqgjP5ubDCqoh1_ZGBw/exec';
-const QUIZ_URL = 'https://diamond-knowledge-test.netlify.app';
+const QUIZ_URL = 'https://igi-4-cs.vercel.app';
 
 // ============ QUESTIONS ============
 const quizQuestions = [

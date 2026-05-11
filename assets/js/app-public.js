@@ -206,6 +206,9 @@ function startQuiz() {
     startTimer();
     showQuestion(0);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Meta Pixel — quiz started
+    if (typeof fbq !== 'undefined') fbq('track', 'InitiateCheckout', { content_name: 'IGI 4Cs Quiz Started' });
 }
 
 // ============ TIMER ============
@@ -343,6 +346,13 @@ function submitQuiz(reason) {
             given:    userAnswers[q.id] !== undefined ? q.options[userAnswers[q.id]] : 'Not answered',
             correct:  q.options[q.correct]
         }));
+
+    // Meta Pixel — quiz completed
+    if (typeof fbq !== 'undefined') fbq('track', 'CompleteRegistration', {
+        content_name: 'IGI 4Cs Quiz Completed',
+        value: score,
+        currency: 'INR'
+    });
 
     // Send to GAS (fire and forget)
     const payload = {
@@ -499,6 +509,12 @@ function bindCourseInterest() {
         // Show confirmation regardless (no-cors = no response)
         document.getElementById('course-confirm').classList.remove('hidden');
         btn.textContent = '✓ Sent';
+
+        // Meta Pixel — course lead
+        if (typeof fbq !== 'undefined') fbq('track', 'Lead', {
+            content_name: course,
+            content_category: 'IGI Course Enquiry'
+        });
     });
 }
 

@@ -5,6 +5,15 @@ const QUIZ_DURATION_SECONDS = 5 * 60; // 5 minutes
 const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwZVl7J17oCnq_A4N8PbvGHdUOcqKe5eItx-ZA0fhSX9d6A1tEtqgjP5ubDCqoh1_ZGBw/exec';
 const QUIZ_URL = 'https://igi-4-cs.vercel.app';
 
+// ── EmailJS Config ──
+const EMAILJS_SERVICE_ID  = 'service_jglwfxg';
+const EMAILJS_TEMPLATE_ID = 'template_xnuvsjy';
+const EMAILJS_PUBLIC_KEY  = 'ubOFK0SB5o7vcTANR';
+
+// ── OTP State ──
+let otpCode = '', otpExpiry = null, otpCountdownIv = null, otpAttempts = 0;
+const OTP_EXPIRY_SEC = 300, OTP_MAX_ATTEMPTS = 5;
+
 // ============ QUESTIONS ============
 const quizQuestions = [
     { id:1,  question:"What does the term 'Carat' specifically measure in a diamond?",                                    options:["Size","Weight","Diameter","Depth"],                                                        correct:1 },
@@ -151,36 +160,152 @@ document.addEventListener('DOMContentLoaded', () => {
 function handleStart() {
     const name  = els.fullName.value.trim();
     const email = els.email.value.trim();
-
-    if (!name || !email) {
-        alert('Please enter your name and email to continue.');
-        return;
-    }
-
+    if (!name || !email) { alert('Please enter your name and email to continue.'); return; }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-        alert('Please enter a valid email address.');
-        return;
-    }
-
+    if (!emailRegex.test(email)) { alert('Please enter a valid email address.'); return; }
     const country = els.country.value || 'India';
-    if (country === 'India' && !els.city.value.trim()) {
-        alert('Please enter your city.');
-        return;
-    }
-
+    if (country === 'India' && !els.city.value.trim()) { alert('Please enter your city.'); return; }
     currentUser = {
-        name,
-        email,
+        name, email,
         mobile:      els.mobile.value.trim() || '',
         countryCode: els.mobile.value.trim() ? els.countryCode.value.replace('-CA','') : '',
         country:     els.country.value || 'India',
         profession:  els.profession.value || 'Not specified',
         city:        els.city.value.trim() || ''
     };
-
-    startQuiz();
+    sendOTP();
 }
+
+// ============ OTP ENGINE ============
+function generateOTP() { return Math.floor(100000 + Math.random() * 900000).toString(); }
+
+function sendOTP() {
+    const btn = els.startBtn;
+    btn.textContent = 'Sending Code...'; btn.classList.add('otp-sending');
+    otpCode = generateOTP(); otpExpiry = Date.now() + (OTP_EXPIRY_SEC * 1000); otpAttempts = 0;
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+        to_name: currentUser.name, to_email: currentUser.email,
+        otp_code: otpCode, quiz_name: 'IGI 4Cs Diamond Quiz', expiry_min: '5'
+    }).then(() => {
+        btn.textContent = 'Start Quiz →'; btn.classList.remove('otp-sending');
+        showOTPSection();
+    }).catch(err => {
+        btn.textContent = 'Start Quiz →'; btn.classList.remove('otp-sending');
+        console.error('EmailJS error:', err);
+        alert('Failed to send verification code. Please check your email and try again.');
+    });
+}
+
+function showOTPSection() {
+    els.reg.classList.add('hidden');
+    const sec = document.getElementById('otp-section');
+    sec.classList.remove('hidden');
+    document.getElementById('otp-email-display').textContent = currentUser.email;
+    document.getElementById('otp-error').classList.add('hidden');
+    document.getElementById('otp-expired').classList.add('hidden');
+    clearOTPBoxes(); startOTPCountdown(); initOTPBoxes();
+    setTimeout(() => document.querySelectorAll('.otp-box')[0]?.focus(), 100);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function clearOTPBoxes() {
+    document.querySelectorAll('.otp-box').forEach(b => { b.value = ''; b.classList.remove('filled','success','error'); });
+}
+
+function initOTPBoxes() {
+    const boxes = [...document.querySelectorAll('.otp-box')];
+    boxes.forEach((box, i) => { const nb = box.cloneNode(true); box.parentNode.replaceChild(nb, box); });
+    const fb = [...document.querySelectorAll('.otp-box')];
+    fb.forEach((box, i) => {
+        box.addEventListener('input', () => {
+            box.value = box.value.replace(/[^0-9]/g, '');
+            box.classList.toggle('filled', !!box.value);
+            if (box.value && i < fb.length - 1) fb[i+1].focus();
+            if (fb.every(b => b.value)) verifyOTP();
+        });
+        box.addEventListener('keydown', e => {
+            if (e.key === 'Backspace' && !box.value && i > 0) { fb[i-1].focus(); fb[i-1].value = ''; fb[i-1].classList.remove('filled'); }
+            if (e.key === 'Enter') verifyOTP();
+        });
+        box.addEventListener('paste', e => {
+            e.preventDefault();
+            const text = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g,'').slice(0,6);
+            text.split('').forEach((ch, idx) => { if (fb[idx]) { fb[idx].value = ch; fb[idx].classList.add('filled'); } });
+            if (fb.every(b => b.value)) verifyOTP();
+        });
+    });
+}
+
+function verifyOTP() {
+    const entered = [...document.querySelectorAll('.otp-box')].map(b => b.value).join('');
+    if (entered.length < 6) return;
+    document.getElementById('otp-error').classList.add('hidden');
+    document.getElementById('otp-expired').classList.add('hidden');
+    if (Date.now() > otpExpiry) {
+        document.querySelectorAll('.otp-box').forEach(b => b.classList.add('error'));
+        document.getElementById('otp-expired').classList.remove('hidden');
+        document.getElementById('otp-timer-txt').classList.add('hidden');
+        document.getElementById('resend-otp-btn').classList.remove('hidden');
+        stopOTPCountdown(); return;
+    }
+    otpAttempts++;
+    if (entered === otpCode) {
+        document.querySelectorAll('.otp-box').forEach(b => b.classList.add('success'));
+        stopOTPCountdown();
+        showToast('✅', 'Email verified! Starting quiz...');
+        setTimeout(() => { document.getElementById('otp-section').classList.add('hidden'); startQuiz(); }, 900);
+    } else {
+        document.querySelectorAll('.otp-box').forEach(b => b.classList.add('error'));
+        setTimeout(() => {
+            document.querySelectorAll('.otp-box').forEach(b => b.classList.remove('error'));
+            const rem = OTP_MAX_ATTEMPTS - otpAttempts;
+            document.getElementById('otp-error').textContent = rem > 0
+                ? `❌ Incorrect code. ${rem} attempt${rem===1?'':'s'} remaining.`
+                : '❌ Too many incorrect attempts. Please request a new code.';
+            document.getElementById('otp-error').classList.remove('hidden');
+            clearOTPBoxes(); document.querySelectorAll('.otp-box')[0]?.focus();
+        }, 500);
+    }
+}
+
+function startOTPCountdown() {
+    stopOTPCountdown();
+    const timerEl = document.getElementById('otp-countdown');
+    const txtEl   = document.getElementById('otp-timer-txt');
+    const resendBtn = document.getElementById('resend-otp-btn');
+    txtEl.classList.remove('hidden','urgent'); resendBtn.classList.add('hidden');
+    otpCountdownIv = setInterval(() => {
+        const rem = Math.max(0, Math.ceil((otpExpiry - Date.now()) / 1000));
+        timerEl.textContent = `${Math.floor(rem/60).toString().padStart(2,'0')}:${(rem%60).toString().padStart(2,'0')}`;
+        if (rem <= 60) txtEl.classList.add('urgent');
+        if (rem <= 0) { stopOTPCountdown(); txtEl.classList.add('hidden'); resendBtn.classList.remove('hidden'); }
+    }, 1000);
+}
+
+function stopOTPCountdown() { if (otpCountdownIv) { clearInterval(otpCountdownIv); otpCountdownIv = null; } }
+
+function goBackToRegistration() {
+    stopOTPCountdown();
+    document.getElementById('otp-section').classList.add('hidden');
+    els.reg.classList.remove('hidden');
+}
+
+// Wire verify + resend buttons on DOM ready (added to existing DOMContentLoaded)
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('verify-otp-btn')?.addEventListener('click', verifyOTP);
+    document.getElementById('resend-otp-btn')?.addEventListener('click', () => {
+        clearOTPBoxes();
+        document.getElementById('otp-error').classList.add('hidden');
+        document.getElementById('otp-expired').classList.add('hidden');
+        otpAttempts = 0; otpCode = generateOTP(); otpExpiry = Date.now() + (OTP_EXPIRY_SEC * 1000);
+        emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+            to_name: currentUser.name, to_email: currentUser.email,
+            otp_code: otpCode, quiz_name: 'IGI 4Cs Diamond Quiz', expiry_min: '5'
+        }).then(() => { startOTPCountdown(); showToast('✉️', 'New code sent to your email!'); })
+          .catch(() => showToast('⚠️', 'Failed to resend. Please try again.'));
+    });
+});
 
 function startQuiz() {
     // Shuffle questions and options

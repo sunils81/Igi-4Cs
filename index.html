@@ -160,6 +160,31 @@
             <p class="note">* Required fields. Your data is safe with IGI. We may share relevant course information.</p>
         </section>
 
+        <!-- OTP Verification -->
+        <section id="otp-section" class="hidden card">
+            <div class="otp-header">
+                <div class="otp-icon">📧</div>
+                <h3>Verify Your Email</h3>
+                <p class="otp-sub">We've sent a 6-digit code to <strong id="otp-email-display"></strong></p>
+            </div>
+            <div class="otp-input-row">
+                <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+            </div>
+            <p id="otp-error" class="otp-error hidden">❌ Incorrect code. Please try again.</p>
+            <p id="otp-expired" class="otp-error otp-expired-msg hidden">⏰ Code expired. Please request a new one.</p>
+            <button id="verify-otp-btn" class="btn-primary" style="width:100%;margin-top:8px;">Verify &amp; Start Quiz →</button>
+            <div class="otp-footer">
+                <span id="otp-timer-txt" class="otp-countdown">Code expires in <span id="otp-countdown">05:00</span></span>
+                <button id="resend-otp-btn" class="otp-resend hidden">Resend Code</button>
+            </div>
+            <p class="otp-note">Didn't receive it? Check your spam folder. <button class="otp-back-btn" onclick="goBackToRegistration()">← Change Email</button></p>
+        </section>
+
         <!-- Quiz -->
         <section id="quiz-section" class="hidden">
             <div class="quiz-header">
@@ -255,5 +280,7 @@
     </footer>
 
     <script src="assets/js/app-public.js"></script>
+    <!-- EmailJS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </body>
 </html>

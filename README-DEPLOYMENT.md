@@ -67,8 +67,10 @@ are all declared in `privacy.html`:
 2. Grievance Officer email — required under DPDP Rule 8
 3. Data retention period
 
-Search the file for `PLACEHOLDER`. The page should not be published with these unfilled.
-The notice has not been reviewed by legal counsel.
+The retention period (24 months) and Grievance Officer contact are filled in. The officer
+is published by role with a monitored address, which satisfies DPDP Rule 8; insert the
+individual's name in `privacy.html` once it is decided. The notice has not been reviewed
+by legal counsel.
 
 ## Test checklist after deploying
 
@@ -81,11 +83,63 @@ The notice has not been reviewed by legal counsel.
    every value in the correct column, including the three Consent columns
 7. Submit a course enquiry and confirm it lands in the Course Enquiries sheet
 
+## CRM feed (Supabase) — setup
+
+Leads now flow from this quiz into the IGI education portal CRM. The Google Sheet is
+still the system of record: the CRM push happens **after** the sheet row is written and
+every failure in it is swallowed and logged, so a CRM outage can never cost a lead.
+
+Only submissions with a ticked consent box are sent. This is enforced twice — in the
+Apps Script, and again server-side in the edge function, because a checkbox's `required`
+attribute is trivially bypassed by a direct POST.
+
+### Script Properties to set
+
+In the Apps Script project: **Project Settings → Script Properties**
+
+| Property | Value |
+|---|---|
+| `SUPABASE_FN_URL` | `https://atbexvtrcopaagcdbpqi.supabase.co/functions/v1/submit-quiz-lead` |
+| `SUPABASE_ANON_KEY` | the portal project's anon key |
+| `SUPABASE_OPTIN_URL` | `https://atbexvtrcopaagcdbpqi.supabase.co/functions/v1/stage-quiz-optin` |
+| `SUPABASE_CONFIRM_URL` | `https://atbexvtrcopaagcdbpqi.supabase.co/functions/v1/confirm-quiz-consent` |
+
+If `SUPABASE_FN_URL` or `SUPABASE_ANON_KEY` is missing, the push is skipped silently and
+the quiz carries on working normally.
+
+### How leads are routed
+
+| Submission | Centre | Owner |
+|---|---|---|
+| Country = India, city maps to a centre | that centre | round-robin / direct, per `crm_routing_rules` |
+| Country ≠ India | `International` | none — admin triage |
+| Country = India, city not recognised | `Unassigned` | none — admin triage |
+
+`International` and `Unassigned` are holding buckets, not real centres. They are visible
+only to admins in the portal and are deliberately absent from batch setup, revenue targets
+and enrolment. A lead nobody can service is never dropped into a counsellor's queue.
+
+A completed quiz creates a lead with course `Undecided` — finishing a quiz is interest,
+not a course choice. A course enquiry carries the course the person actually asked about
+and scores higher. Repeat visitors are deduplicated on mobile, then email; an existing
+lead is never reassigned or re-staged by a quiz, only annotated and nudged.
+
+### Historical enquiries (`optin-sender.gs`)
+
+Enquiries collected before the consent checkbox existed are **not** imported. Running
+`sendOptInEmails()` emails each of them once, asking permission; only a click on
+"Yes, keep in touch" creates a CRM lead, stamped with the moment of consent. Until then
+their details sit in `crm_lead_optin_pending`, which no counsellor and no browser can
+read, and which can simply be deleted.
+
+Run `sendOptInEmailsDryRun()` first — it logs exactly who would be emailed and sends
+nothing. The sender is safe to re-run: anyone already emailed, confirmed or declined is
+skipped, and it stops at the daily Gmail cap.
+
 ## Notes
 
-- Data currently lands in Google Sheets. A direct feed into the IGI education portal CRM
-  (Supabase) is planned; it will be added inside the Apps Script, so no change to this
-  website will be needed.
+- Data lands in Google Sheets and is then mirrored into the IGI education portal CRM
+  (Supabase) from inside the Apps Script — see "CRM feed" above.
 - The lead sheets are written **by matching the sheet's header names**, not by column
   position. Columns in the Google Sheet may be reordered safely; do not rename the header
   cells, as the script matches on those names.

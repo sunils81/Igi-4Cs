@@ -86,6 +86,9 @@ function handleCourseInterest(ss, data) {
   sheet.getRange(newRow, 1, 1, written.header.length).setBackground('#fff9e6');
   var ciCol = colOf(written.header, 'Course Interest');
   if (ciCol) sheet.getRange(newRow, ciCol).setFontWeight('bold').setFontColor('#094d59');
+
+  // Sheet row is safely written — now mirror into the portal CRM.
+  pushLeadToCRM(data, 'Diamond 4Cs Quiz', data.course || '');
 }
 
 // ============================================================
@@ -152,6 +155,11 @@ function handlePublicSubmission(ss, data) {
 
   // Rebuild public dashboard
   rebuildPublicDashboard(ss);
+
+  // Sheet row is safely written — now mirror into the portal CRM. No course is
+  // passed: finishing a quiz is interest, not a course choice.
+  data.badge = badge;
+  pushLeadToCRM(data, 'Diamond 4Cs Quiz', '');
 }
 
 // ============================================================
@@ -447,4 +455,71 @@ function writeRowByHeader(sheet, fields, ensure) {
 function colOf(header, name) {
   var i = header.indexOf(name);
   return i === -1 ? 0 : i + 1;
+}
+
+// ============================================================
+//  pushLeadToCRM — 2026-10-14
+//  Forward-only feed from this quiz into the IGI portal CRM.
+//
+//  Called AFTER the Google Sheet row is written, never before: the sheet
+//  stays the system of record, so if Supabase is down, slow, or misconfigured
+//  we still have the lead. Every failure here is swallowed and logged — a CRM
+//  problem must never turn into a failed quiz submission for the visitor.
+//
+//  Consent is mandatory. Rows without a ticked consent box are written to the
+//  sheet as before but are NOT sent to the CRM, so the CRM only ever holds
+//  contacts we can defend under the DPDP Act.
+//
+//  SETUP (File > Project Settings > Script Properties):
+//    SUPABASE_FN_URL   https://atbexvtrcopaagcdbpqi.supabase.co/functions/v1/submit-quiz-lead
+//    SUPABASE_ANON_KEY <the project's anon key>
+//  If either is missing the push is skipped silently — the quiz keeps working.
+// ============================================================
+function pushLeadToCRM(data, quizName, courseName) {
+  try {
+    if (data.consentGiven !== true) return;   // no consent, no CRM row
+
+    var props = PropertiesService.getScriptProperties();
+    var url = props.getProperty('SUPABASE_FN_URL');
+    var key = props.getProperty('SUPABASE_ANON_KEY');
+    if (!url || !key) {
+      Logger.log('pushLeadToCRM skipped: SUPABASE_FN_URL / SUPABASE_ANON_KEY not set');
+      return;
+    }
+
+    var payload = {
+      name:            data.name        || '',
+      email:           data.email       || '',
+      mobile:          data.mobile      || '',
+      country_code:    data.countryCode || '',
+      country:         data.country     || '',
+      city:            data.city        || '',
+      profession:      data.profession  || '',
+      quiz:            quizName,
+      score:           data.score != null ? Number(data.score) : null,
+      total:           data.total != null ? Number(data.total) : null,
+      badge:           data.badge       || '',
+      consent:         true,
+      consent_version: data.consentVersion || '',
+      web_meta: {
+        submitted_at: data.submittedAt || '',
+        device:       data.deviceType  || '',
+        user_agent:   data.userAgent   || ''
+      }
+    };
+    // Only a course enquiry names a course. A bare quiz completion must not,
+    // or the CRM fills with course demand nobody actually expressed.
+    if (courseName) payload.course = courseName;
+
+    var res = UrlFetchApp.fetch(url, {
+      method: 'post',
+      contentType: 'application/json',
+      headers: { Authorization: 'Bearer ' + key },
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true          // never throw into the sheet write
+    });
+    Logger.log('pushLeadToCRM ' + res.getResponseCode() + ': ' + res.getContentText());
+  } catch (err) {
+    Logger.log('pushLeadToCRM failed (lead is still safe in the sheet): ' + err);
+  }
 }

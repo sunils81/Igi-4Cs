@@ -3,7 +3,12 @@
 // ============ CONFIG ============
 const QUIZ_DURATION_SECONDS = 5 * 60; // 5 minutes
 const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwZVl7J17oCnq_A4N8PbvGHdUOcqKe5eItx-ZA0fhSX9d6A1tEtqgjP5ubDCqoh1_ZGBw/exec';
-const QUIZ_URL = 'https://igi-4-cs.vercel.app';
+
+// Consent wording version. Bump this string whenever the consent text in index.html
+// changes, so every stored lead records which wording it actually agreed to. The CRM
+// keeps this in crm_leads.consent_version alongside consent_at. 2026-10-14.
+const CONSENT_VERSION = '2026-10-14-v1';
+const QUIZ_URL = 'https://learn.igi.org/diamonds/';
 
 // ── EmailJS Config ──
 const EMAILJS_SERVICE_ID  = 'service_jglwfxg';
@@ -19,7 +24,7 @@ const quizQuestions = [
     { id:1,  question:"What does the term 'Carat' specifically measure in a diamond?",                                    options:["Size","Weight","Diameter","Depth"],                                                        correct:1 },
     { id:2,  question:"How many milligrams is equal to 1 carat?",                                                        options:["50 mg","100 mg","200 mg","400 mg"],                                                       correct:2 },
     { id:3,  question:"Which is the highest grade on the normal color grading scale for diamonds?",                            options:["A","D","Z","G"],                                                                          correct:1 },
-    { id:4,  question:"A diamond graded 'H' in color is categorized as:",                                                 options:["Colorless","Near Colorless","Faint Yellow","Very Light Yellow"],                          correct:1 },
+    { id:4,  question:"A polished diamond graded 'H' in color is categorized as:",                                                 options:["Colorless","Near Colorless","Faint Yellow","Very Light Yellow"],                          correct:1 },
     { id:5,  question:"What does the 'Clarity' grade assess?",                                                       options:["Polish and symmetry","Transparency","Blemishes and inclusions","Brightness and fire"],           correct:2 },
     { id:6,  question:"A diamond completely free of inclusions and blemishes under 10X magnification may earn which grade?", options:["VVS1","IF (Internally Flawless)","FL (Flawless)","VS1"],              correct:2 },
     { id:7,  question:"What is the general term for characteristics trapped inside a diamond?",                        options:["Blemishes","Inclusions","Carbon","Cracks"],                                               correct:1 },
@@ -33,7 +38,7 @@ const quizQuestions = [
     { id:15, question:"What is 'Fire' in a diamond?",                                                                    options:["The sparkle seen when the diamond is moved","Dispersed light seen as spectral colors","Reflections of colors in the environment","The overall brightness of the stone"], correct:1 },
     { id:16, question:"What does 'Scintillation' refer to in a diamond?",                                                 options:["The overall whiteness of the stone","The color saturation that appears under bright lights","Brightness, fire, and contrast seen together with motion","The depth percentage"], correct:2 },
     { id:17, question:"A '1-pointer' diamond weighs approximately:",                                                      options:["0.01 carats","0.10 carats","1.00 carat","0.001 carats"],                                 correct:0 },
-    { id:18, question:"A feather-like break inside a diamond is called a:",                                               options:["Knot","Cloud","Feather","Twinning wisp"],                                              correct:2 },
+    { id:18, question:"A fracture or cleavage within a diamond is called a:",                                               options:["Knot","Cloud","Feather","Twinning wisp"],                                              correct:2 },
     { id:19, question:"Which of the following are considered 'Fancy Shaped' diamonds?",                                      options:["Round Brilliant only","Oval, Marquise, Princess, Pear","Only square shapes","Only elongated shapes"], correct:1 },
     { id:20, question:"The 'Table' of a diamond is best described as:",                                                   options:["The largest flat facet on the top","The bottom pointed facet","The girdle circumference","The crown angle"], correct:0 },
     { id:21, question:"How many facets does a modern Round Brilliant cut diamond have?",                                 options:["32","48","57","64"],                                                                     correct:2 },
@@ -121,6 +126,26 @@ document.addEventListener('DOMContentLoaded', () => {
         'Turkey': '+90', 'Italy': '+39', 'South Africa': '+27'
     };
 
+    const cityPlaceholders = {
+        'India':        'e.g. Mumbai, Delhi, Surat, Jaipur...',
+        'Belgium':      'e.g. Antwerp, Brussels, Ghent...',
+        'USA':          'e.g. New York, Los Angeles, Chicago, Miami...',
+        'UAE':          'e.g. Dubai, Abu Dhabi, Sharjah...',
+        'China':        'e.g. Shanghai, Shenzhen, Beijing, Guangzhou...',
+        'Hong Kong':    'e.g. Central, Kowloon, Causeway Bay...',
+        'UK':           'e.g. London, Birmingham, Manchester...',
+        'Singapore':    'e.g. Orchard, Marina Bay, Jurong...',
+        'Australia':    'e.g. Sydney, Melbourne, Brisbane, Perth...',
+        'Canada':       'e.g. Toronto, Vancouver, Montreal, Calgary...',
+        'Japan':        'e.g. Tokyo, Osaka, Nagoya, Yokohama...',
+        'Israel':       'e.g. Tel Aviv, Jerusalem, Haifa...',
+        'Thailand':     'e.g. Bangkok, Chiang Mai, Pattaya...',
+        'Turkey':       'e.g. Istanbul, Ankara, Izmir...',
+        'Italy':        'e.g. Milan, Vicenza, Rome, Florence...',
+        'South Africa': 'e.g. Johannesburg, Cape Town, Durban...',
+        'Other':        'Your city or region'
+    };
+
     function updateCityField(country) {
         const cityGroup = document.getElementById('city-group');
         const cityLabel = document.getElementById('city-label');
@@ -133,12 +158,12 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (country === 'India') {
             cityGroup.style.display = 'flex';
             cityLabel.textContent = 'City *';
-            cityInput.placeholder = 'e.g. Mumbai, Delhi, Surat...';
+            cityInput.placeholder = cityPlaceholders['India'];
             cityInput.required = true;
         } else {
             cityGroup.style.display = 'flex';
-            cityLabel.textContent = 'State / Region (optional)';
-            cityInput.placeholder = 'e.g. California, Dubai Marina...';
+            cityLabel.textContent = 'City / Region (optional)';
+            cityInput.placeholder = cityPlaceholders[country] || 'Your city or region';
             cityInput.required = false;
         }
     }
@@ -165,13 +190,33 @@ function handleStart() {
     if (!emailRegex.test(email)) { alert('Please enter a valid email address.'); return; }
     const country = els.country.value || 'India';
     if (country === 'India' && !els.city.value.trim()) { alert('Please enter your city.'); return; }
+
+    // Mobile is now mandatory — a lead we cannot call is of little use to a counsellor,
+    // and 40% of historic quiz leads came through with no number at all. 2026-10-14.
+    const mobile = els.mobile.value.trim();
+    if (!mobile) { alert('Please enter your mobile number.'); return; }
+    if (!/^[0-9]{6,15}$/.test(mobile.replace(/[\s\-()]/g, ''))) {
+        alert('Please enter a valid mobile number (digits only, 6-15 digits).'); return;
+    }
+
+    // Consent gate — these details go on to the IGI CRM for course follow-up, so the
+    // person has to agree to that here, before anything is collected. Captured with a
+    // version and timestamp so the basis for contacting them is auditable later.
+    const consentEl = document.getElementById('consent');
+    if (!consentEl || !consentEl.checked) {
+        alert('Please tick the consent box so we can share course information with you.'); return;
+    }
+
     currentUser = {
         name, email,
-        mobile:      els.mobile.value.trim() || '',
-        countryCode: els.mobile.value.trim() ? els.countryCode.value.replace('-CA','') : '',
+        mobile:      mobile,
+        countryCode: els.countryCode.value.replace('-CA',''),
         country:     els.country.value || 'India',
         profession:  els.profession.value || 'Not specified',
-        city:        els.city.value.trim() || ''
+        city:        els.city.value.trim() || '',
+        consentGiven:   true,
+        consentVersion: CONSENT_VERSION,
+        consentAt:      new Date().toISOString()
     };
     sendOTP();
 }
@@ -497,7 +542,10 @@ function submitQuiz(reason) {
         screenRes:   `${window.screen.width}x${window.screen.height}`,
         userAgent:   navigator.userAgent,
         wrongAnswers,
-        submittedAt: new Date().toISOString()
+        submittedAt: new Date().toISOString(),
+        consentGiven:   currentUser.consentGiven === true,
+        consentVersion: currentUser.consentVersion || '',
+        consentAt:      currentUser.consentAt || ''
     };
 
     fetch(GAS_WEB_APP_URL, {
@@ -515,6 +563,7 @@ function showResult(score, total, timeStr, pct, wrongAnswers) {
     els.quiz.classList.add('hidden');
     els.result.classList.remove('hidden');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    populateCourseSelect(currentUser.country || 'India');
     bindCourseInterest();
 
     els.resName.textContent = currentUser.name;
@@ -591,9 +640,99 @@ function copyShareLink() {
     navigator.clipboard.writeText(text).then(() => {
         const btn = document.getElementById('copy-btn');
         btn.textContent = '✅ Copied!';
-        setTimeout(() => { btn.textContent = '🔗 Copy Link'; }, 2500);
+        setTimeout(() => { btn.textContent = '🔗 Copy Results'; }, 2500);
     }).catch(() => {
         alert('Copy this link: ' + QUIZ_URL);
+    });
+}
+
+// ============ COUNTRY-SPECIFIC COURSE LIST ============
+// Based on IGI School of Gemology global catalog.
+// India: full list including India-only programs (JewelPad, Gem-A via Mumbai ATC, Jewelry Retail Management).
+// Global hubs (UAE, Belgium, Israel): diamond/gemstone focus, Graduate programs.
+// English-speaking markets (USA, UK, Australia, Canada): Graduate programs + eLearning.
+// Asia-Pacific (Hong Kong, Singapore, Japan): Graduate programs + Colored Stones.
+// Other: core global programs only.
+
+const COURSES_BY_COUNTRY = {
+    'India': [
+        { value: 'Graduate Gemologist Program (G.G.)',        label: '🏆 Graduate Gemologist Program (G.G.)' },
+        { value: 'Diamond Graduate Program (D.G.)',            label: '💎 Diamond Graduate Program (D.G.)' },
+        { value: 'Colored Stone Graduate Program (C.S.G.)',    label: '🪨 Colored Stone Graduate Program (C.S.G.)' },
+        { value: 'Gem-A Foundation & Diploma (FGA pathway)',   label: '🎓 Gem-A Foundation & Diploma (FGA pathway)' },
+        { value: 'Digital Jewelry Design – JewelPad',          label: '🖥️ Digital Jewelry Design – JewelPad' },
+        { value: 'Jewelry Design Graduate Program (J.D.G.)',   label: '✏️ Jewelry Design Graduate Program (J.D.G.)' },
+        { value: 'Pearl Course',                               label: '🦪 Pearl Course' },
+        { value: 'Jewelry Retail Management',                  label: '🏪 Jewelry Retail Management' },
+        { value: 'Online Diamond Grading (eLearning)',         label: '💻 Online Diamond Grading (eLearning)' },
+        { value: 'Just Exploring',                             label: '🔍 Just Exploring for Now' },
+    ],
+    'UAE': [
+        { value: 'Graduate Gemologist Program (G.G.)',        label: '🏆 Graduate Gemologist Program (G.G.)' },
+        { value: 'Diamond Graduate Program (D.G.)',            label: '💎 Diamond Graduate Program (D.G.)' },
+        { value: 'Colored Stone Graduate Program (C.S.G.)',    label: '🪨 Colored Stone Graduate Program (C.S.G.)' },
+        { value: 'Jewelry Design Graduate Program (J.D.G.)',   label: '✏️ Jewelry Design Graduate Program (J.D.G.)' },
+        { value: 'Pearl Course',                               label: '🦪 Pearl Course' },
+        { value: 'Online Diamond Grading (eLearning)',         label: '💻 Online Diamond Grading (eLearning)' },
+        { value: 'Just Exploring',                             label: '🔍 Just Exploring for Now' },
+    ],
+    'Belgium': [
+        { value: 'Graduate Gemologist Program (G.G.)',        label: '🏆 Graduate Gemologist Program (G.G.)' },
+        { value: 'Diamond Graduate Program (D.G.)',            label: '💎 Diamond Graduate Program (D.G.)' },
+        { value: 'Colored Stone Graduate Program (C.S.G.)',    label: '🪨 Colored Stone Graduate Program (C.S.G.)' },
+        { value: 'Diamond Grading Essentials',                 label: '🔬 Diamond Grading Essentials' },
+        { value: 'Online Diamond Grading (eLearning)',         label: '💻 Online Diamond Grading (eLearning)' },
+        { value: 'Just Exploring',                             label: '🔍 Just Exploring for Now' },
+    ],
+    'Israel': [
+        { value: 'Graduate Gemologist Program (G.G.)',        label: '🏆 Graduate Gemologist Program (G.G.)' },
+        { value: 'Diamond Graduate Program (D.G.)',            label: '💎 Diamond Graduate Program (D.G.)' },
+        { value: 'Colored Stone Graduate Program (C.S.G.)',    label: '🪨 Colored Stone Graduate Program (C.S.G.)' },
+        { value: 'Diamond Grading Essentials',                 label: '🔬 Diamond Grading Essentials' },
+        { value: 'Online Diamond Grading (eLearning)',         label: '💻 Online Diamond Grading (eLearning)' },
+        { value: 'Just Exploring',                             label: '🔍 Just Exploring for Now' },
+    ],
+    'USA': [
+        { value: 'Graduate Gemologist Program (G.G.)',        label: '🏆 Graduate Gemologist Program (G.G.)' },
+        { value: 'Diamond Graduate Program (D.G.)',            label: '💎 Diamond Graduate Program (D.G.)' },
+        { value: 'Colored Stone Graduate Program (C.S.G.)',    label: '🪨 Colored Stone Graduate Program (C.S.G.)' },
+        { value: 'Jewelry Design Graduate Program (J.D.G.)',   label: '✏️ Jewelry Design Graduate Program (J.D.G.)' },
+        { value: 'Pearl Course',                               label: '🦪 Pearl Course' },
+        { value: 'Diamond Grading Essentials',                 label: '🔬 Diamond Grading Essentials' },
+        { value: 'Online Diamond Grading (eLearning)',         label: '💻 Online Diamond Grading (eLearning)' },
+        { value: 'Just Exploring',                             label: '🔍 Just Exploring for Now' },
+    ],
+    'UK': [
+        { value: 'Graduate Gemologist Program (G.G.)',        label: '🏆 Graduate Gemologist Program (G.G.)' },
+        { value: 'Diamond Graduate Program (D.G.)',            label: '💎 Diamond Graduate Program (D.G.)' },
+        { value: 'Colored Stone Graduate Program (C.S.G.)',    label: '🪨 Colored Stone Graduate Program (C.S.G.)' },
+        { value: 'Jewelry Design Graduate Program (J.D.G.)',   label: '✏️ Jewelry Design Graduate Program (J.D.G.)' },
+        { value: 'Pearl Course',                               label: '🦪 Pearl Course' },
+        { value: 'Online Diamond Grading (eLearning)',         label: '💻 Online Diamond Grading (eLearning)' },
+        { value: 'Just Exploring',                             label: '🔍 Just Exploring for Now' },
+    ],
+};
+// All remaining countries use the default global list
+const COURSES_DEFAULT = [
+    { value: 'Graduate Gemologist Program (G.G.)',        label: '🏆 Graduate Gemologist Program (G.G.)' },
+    { value: 'Diamond Graduate Program (D.G.)',            label: '💎 Diamond Graduate Program (D.G.)' },
+    { value: 'Colored Stone Graduate Program (C.S.G.)',    label: '🪨 Colored Stone Graduate Program (C.S.G.)' },
+    { value: 'Jewelry Design Graduate Program (J.D.G.)',   label: '✏️ Jewelry Design Graduate Program (J.D.G.)' },
+    { value: 'Pearl Course',                               label: '🦪 Pearl Course' },
+    { value: 'Online Diamond Grading (eLearning)',         label: '💻 Online Diamond Grading (eLearning)' },
+    { value: 'Just Exploring',                             label: '🔍 Just Exploring for Now' },
+];
+
+function populateCourseSelect(country) {
+    const sel = document.getElementById('course-select');
+    if (!sel) return;
+    const courses = COURSES_BY_COUNTRY[country] || COURSES_DEFAULT;
+    sel.innerHTML = '<option value="" selected disabled>Select a course...</option>';
+    courses.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.value;
+        opt.textContent = c.label;
+        sel.appendChild(opt);
     });
 }
 
@@ -621,7 +760,10 @@ function bindCourseInterest() {
             score:      finalScore,
             total:      finalTotal,
             pct:        Math.round((finalScore/finalTotal)*100) + '%',
-            submittedAt: new Date().toISOString()
+            submittedAt: new Date().toISOString(),
+            consentGiven:   currentUser.consentGiven === true,
+            consentVersion: currentUser.consentVersion || '',
+            consentAt:      currentUser.consentAt || ''
         };
 
         fetch(GAS_WEB_APP_URL, {
@@ -633,7 +775,7 @@ function bindCourseInterest() {
 
         // Show confirmation regardless (no-cors = no response)
         document.getElementById('course-confirm').classList.remove('hidden');
-        btn.textContent = '✓ Sent';
+        btn.textContent = '✓ Sent — An IGI Team Member will be in touch!';
 
         // Meta Pixel — course lead
         if (typeof fbq !== 'undefined') fbq('track', 'Lead', {

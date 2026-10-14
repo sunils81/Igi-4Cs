@@ -61,25 +61,31 @@ function handleCourseInterest(ss, data) {
       .forEach(function(w,i){ sheet.setColumnWidth(i+1,w); });
   }
 
-  var newRow = sheet.getLastRow() + 1;
-  sheet.appendRow([
-    new Date(),
-    data.name        || '',
-    data.email       || '',
-    data.mobile      || '',
-    data.countryCode || '',
-    data.country     || '',
-    data.city        || '',
-    data.profession  || '',
-    data.course      || '',
-    (data.score || 0) + '/' + (data.total || 25),
-    data.pct         || '',
-    data.submittedAt || ''
-  ]);
+  // By header name, not position — see writeRowByHeader. 2026-10-14.
+  var written = writeRowByHeader(sheet, {
+    'Timestamp':       new Date(),
+    'Name':            data.name        || '',
+    'Email':           data.email       || '',
+    'Mobile':          data.mobile      || '',
+    'Country Code':    data.countryCode || '',
+    'Country':         data.country     || '',
+    'City':            data.city        || '',
+    'Profession':      data.profession  || '',
+    'Course Interest': data.course      || '',
+    'Quiz Score':      (data.score || 0) + '/' + (data.total || 25),
+    'Quiz %':          data.pct         || '',
+    'Submitted At':    data.submittedAt || '',
+    'Consent':         data.consentGiven === true ? 'Yes' : 'No',
+    'Consent Version': data.consentVersion || '',
+    'Consent At':      data.consentAt      || ''
+  }, ['Consent', 'Consent Version', 'Consent At']);
 
-  sheet.getRange(newRow, 4).setNumberFormat('@STRING@');
-  sheet.getRange(newRow, 1, 1, 12).setBackground('#fff9e6');
-  sheet.getRange(newRow, 9).setFontWeight('bold').setFontColor('#094d59');
+  var newRow = written.row;
+  var mobCol = colOf(written.header, 'Mobile');
+  if (mobCol) sheet.getRange(newRow, mobCol).setNumberFormat('@STRING@');
+  sheet.getRange(newRow, 1, 1, written.header.length).setBackground('#fff9e6');
+  var ciCol = colOf(written.header, 'Course Interest');
+  if (ciCol) sheet.getRange(newRow, ciCol).setFontWeight('bold').setFontColor('#094d59');
 }
 
 // ============================================================
@@ -100,37 +106,46 @@ function handlePublicSubmission(ss, data) {
   var ts = new Date();
   var newRow = sheet.getLastRow() + 1;
 
-  sheet.appendRow([
-    ts,                              // A: Timestamp
-    data.name         || '',         // B: Name
-    data.email        || '',         // C: Email
-    data.mobile       || '',         // D: Mobile Number
-    data.countryCode  || '',         // E: Country Code
-    data.country      || '',         // F: Country
-    data.profession   || '',         // G: Profession
-    data.city         || '',         // H: City
-    score,                           // I: Score
-    total,                           // J: Total
-    pct + '%',                       // K: Percentage
-    badge,                           // L: Badge
-    data.timeTaken    || '',         // M: Time Taken
-    data.deviceType   || '',         // N: Device
-    data.screenRes    || '',         // O: Screen
-    data.submitReason || 'Manual',   // P: Submit Reason
-    data.userAgent    || '',         // Q: User Agent
-    data.submittedAt  || ''          // R: Submitted At
-  ]);
+  // By header name, not position — see writeRowByHeader. 2026-10-14.
+  var written = writeRowByHeader(sheet, {
+    'Timestamp':     ts,
+    'Name':          data.name         || '',
+    'Email':         data.email        || '',
+    'Mobile Number': data.mobile       || '',
+    'Mobile':        data.mobile       || '',   // whichever label this sheet carries
+    'Country Code':  data.countryCode  || '',
+    'Country':       data.country      || '',
+    'Profession':    data.profession   || '',
+    'City':          data.city         || '',
+    'Score':         score,
+    'Total':         total,
+    'Percentage':    pct + '%',
+    'Badge':         badge,
+    'Time Taken':    data.timeTaken    || '',
+    'Device':        data.deviceType   || '',
+    'Screen':        data.screenRes    || '',
+    'Screen Res':    data.screenRes    || '',
+    'Submit Reason': data.submitReason || 'Manual',
+    'User Agent':    data.userAgent    || '',
+    'Submitted At':  data.submittedAt  || '',
+    'Consent':         data.consentGiven === true ? 'Yes' : 'No',
+    'Consent Version': data.consentVersion || '',
+    'Consent At':      data.consentAt      || ''
+  }, ['Consent', 'Consent Version', 'Consent At']);
+  newRow = written.row;
 
-  // Force mobile column (D) as plain text
-  sheet.getRange(newRow, 4).setNumberFormat('@STRING@');
+  // Keep the mobile column as plain text so a leading + or 0 is not eaten by Sheets.
+  var mobCol = colOf(written.header, 'Mobile Number') || colOf(written.header, 'Mobile');
+  if (mobCol) sheet.getRange(newRow, mobCol).setNumberFormat('@STRING@');
 
   // Colour by badge
   var bg = pct >= 90 ? '#fff9e6'
          : pct >= 75 ? '#e6f4ea'
          : pct >= 60 ? '#e8f4ff'
          : '#fce8e6';
-  sheet.getRange(newRow, 1, 1, 18).setBackground(bg);
-  sheet.getRange(newRow, 12).setFontWeight('bold');
+  sheet.getRange(newRow, 1, 1, written.header.length).setBackground(bg);
+  var badgeCol = colOf(written.header, 'Badge');
+  if (badgeCol) sheet.getRange(newRow, badgeCol).setFontWeight('bold');
 
   // Write wrong answers to Public Wrong Answers sheet
   writePublicWrongAnswers(ss, data, pct, badge);
@@ -385,4 +400,51 @@ function getOrCreateSheet(ss, name) {
 function jsonResponse(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+// ============================================================
+//  writeRowByHeader — 2026-10-14
+//  Appends a row by MATCHING THE SHEET'S OWN HEADER NAMES, instead of trusting a
+//  positional array. Found 2026-10-14: the live "Gemstone Leads" header row had been
+//  reordered by hand (Country Code before Mobile, City before Profession) while the
+//  script kept appending in code order, so every new row landed one or two columns out
+//  — mobiles sitting in Country Code, cities in Profession. A positional appendRow can
+//  never survive someone dragging a column in Sheets; matching on the header can.
+//
+//  Also self-heals: any name in `fields` that the sheet does not yet have is appended as
+//  a new column, so adding Consent/Consent Version/Consent At needs no manual edit.
+//
+//  fields = { 'Header Name': value, ... }
+//  ensure = ['New Column', ...]  columns created if the sheet lacks them
+// ============================================================
+function writeRowByHeader(sheet, fields, ensure) {
+  var lastCol = Math.max(sheet.getLastColumn(), 1);
+  var header  = sheet.getLastRow() > 0
+    ? sheet.getRange(1, 1, 1, lastCol).getValues()[0].map(function(h){ return String(h).trim(); })
+    : [];
+
+  // Only names listed in `ensure` are created if missing. Everything else in `fields`
+  // is written ONLY where the sheet already has that column — which lets a payload carry
+  // alternate labels for the same value (a sheet may say 'Mobile' or 'Mobile Number')
+  // without the unused alias spawning a duplicate column.
+  (ensure || []).forEach(function(name) {
+    if (header.indexOf(name) === -1) {
+      header.push(name);
+      sheet.getRange(1, header.length).setValue(name)
+        .setFontWeight('bold').setBackground(TEAL).setFontColor(WHITE).setFontFamily('Arial');
+    }
+  });
+
+  var row = header.map(function(name) {
+    return Object.prototype.hasOwnProperty.call(fields, name) ? fields[name] : '';
+  });
+  sheet.appendRow(row);
+  return { row: sheet.getLastRow(), header: header };
+}
+
+// Column number of a header name (1-based), or 0 if absent. For per-cell formatting
+// after writeRowByHeader, so formatting follows the column rather than a fixed letter.
+function colOf(header, name) {
+  var i = header.indexOf(name);
+  return i === -1 ? 0 : i + 1;
 }

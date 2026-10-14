@@ -685,3 +685,18 @@ footer {
   .otp-box { width: 40px; height: 50px; font-size: 1.4rem; }
   .otp-input-row { gap: 8px; }
 }
+
+/* ── Consent block (added 2026-10-14) ──
+   Required tick before the quiz starts: these details go to the IGI CRM for course
+   follow-up, so the agreement is captured here with the wording version and timestamp. */
+.consent-group { margin-top: 4px; }
+.consent-label {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 0.78rem; line-height: 1.45; font-weight: 400;
+  color: #555; cursor: pointer; text-align: left;
+}
+.consent-label input[type="checkbox"] {
+  flex: 0 0 auto; width: 16px; height: 16px; margin-top: 2px; cursor: pointer;
+}
+.consent-label a { color: #0D1B2E; text-decoration: underline; }
+.consent-label a:hover { color: #C9A84C; }

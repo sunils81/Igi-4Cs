@@ -83,7 +83,7 @@
         <!-- Registration -->
         <section id="registration-section" class="hidden card">
             <h3>Just a Few Details</h3>
-            <p class="reg-sub">We'll use this to personalise your results and let you know about IGI courses.</p>
+            <p class="reg-sub">We'll use this to personalize your results and let you know about IGI courses.</p>
             <div class="form-grid-pub">
                 <div class="form-group">
                     <label for="fullName">Your Name *</label>
@@ -97,26 +97,26 @@
                     <label for="country">Country *</label>
                     <select id="country" required>
                         <option value="India" selected>🇮🇳 India</option>
-                        <option value="Belgium">🇧🇪 Belgium (Antwerp)</option>
+                        <option value="Belgium">🇧🇪 Belgium</option>
                         <option value="USA">🇺🇸 United States</option>
-                        <option value="UAE">🇦🇪 UAE (Dubai)</option>
-                        <option value="China">🇨🇳 China (Shanghai / Shenzhen)</option>
+                        <option value="UAE">🇦🇪 UAE</option>
+                        <option value="China">🇨🇳 China</option>
                         <option value="Hong Kong">🇭🇰 Hong Kong</option>
                         <option value="UK">🇬🇧 United Kingdom</option>
                         <option value="Singapore">🇸🇬 Singapore</option>
                         <option value="Australia">🇦🇺 Australia</option>
                         <option value="Canada">🇨🇦 Canada</option>
-                        <option value="Japan">🇯🇵 Japan (Tokyo)</option>
-                        <option value="Israel">🇮🇱 Israel (Tel Aviv)</option>
-                        <option value="Thailand">🇹🇭 Thailand (Bangkok)</option>
-                        <option value="Turkey">🇹🇷 Turkey (Istanbul)</option>
+                        <option value="Japan">🇯🇵 Japan</option>
+                        <option value="Israel">🇮🇱 Israel</option>
+                        <option value="Thailand">🇹🇭 Thailand</option>
+                        <option value="Turkey">🇹🇷 Turkey</option>
                         <option value="Italy">🇮🇹 Italy</option>
                         <option value="South Africa">🇿🇦 South Africa</option>
                         <option value="Other">🌍 Other</option>
                     </select>
                 </div>
                 <div class="form-group mobile-group">
-                    <label>Mobile (optional)</label>
+                    <label>Mobile *</label>
                     <div class="mobile-input-row">
                         <select id="countryCode">
                             <option value="+91" selected>🇮🇳 +91</option>
@@ -137,7 +137,7 @@
                             <option value="+27">🇿🇦 +27</option>
                             <option value="other">🌍 Other</option>
                         </select>
-                        <input type="tel" id="mobile" placeholder="Mobile number" autocomplete="off">
+                        <input type="tel" id="mobile" placeholder="Mobile number" required autocomplete="off">
                     </div>
                 </div>
                 <div class="form-group">
@@ -156,8 +156,18 @@
                     <input type="text" id="city" placeholder="Your city" autocomplete="off">
                 </div>
             </div>
+            <div class="form-group consent-group">
+                <label class="consent-label">
+                    <input type="checkbox" id="consent" required>
+                    <span>I agree that IGI may contact me by phone, email or WhatsApp about its
+                    gemology courses, and may store the details I have given here for that purpose.
+                    I can withdraw this at any time by writing to
+                    <a href="mailto:education.india@igi.org">education.india@igi.org</a>.
+                    See IGI's <a href="https://www.igi.org/privacy-policy/" target="_blank" rel="noopener">Privacy Policy</a>. *</span>
+                </label>
+            </div>
             <button id="start-btn" class="btn-primary">Start Quiz →</button>
-            <p class="note">* Required fields. Your data is safe with IGI. We may share relevant course information.</p>
+            <p class="note">* Required fields.</p>
         </section>
 
         <!-- OTP Verification -->
@@ -231,19 +241,13 @@
             <!-- Course Interest -->
             <div class="course-interest" id="course-interest-section">
                 <p class="course-title">📚 Interested in an IGI course?</p>
-                <p class="course-sub">Select a program you'd like to know more about and we'll have a counsellor reach out.</p>
+                <p class="course-sub">Select a program you'd like to know more about and we'll have an IGI Team Member reach out.</p>
+                <!-- Course options are populated dynamically by country in app-public.js -->
                 <select id="course-select" class="course-select">
                     <option value="" selected disabled>Select a course...</option>
-                    <option value="Diamond Grading & Gemology">💎 Diamond Grading &amp; Gemology</option>
-                    <option value="Gem-A FGA">🎓 Gem-A FGA (Fellowship in Gemmology)</option>
-                    <option value="Colored Gemstones">🪨 Colored Gemstones</option>
-                    <option value="Digital Jewelry Design - JewelPad">🖥️ Digital Jewelry Design – JewelPad</option>
-                    <option value="Jewelry Retail Management">🏪 Jewelry Retail Management</option>
-                    <option value="Online Diamond Grading Course">💻 Online Diamond Grading Course</option>
-                    <option value="Just Exploring">🔍 Just Exploring for Now</option>
                 </select>
                 <button id="course-submit-btn" class="btn-course">Send Me Details →</button>
-                <p id="course-confirm" class="course-confirm hidden">✅ Thank you! Our counsellor will reach out to you shortly.</p>
+                <p id="course-confirm" class="course-confirm hidden">✅ Thank you! An IGI Team Member will reach out to you shortly.</p>
             </div>
 
             <!-- Share -->
@@ -253,17 +257,17 @@
                 <div class="share-buttons">
                     <button onclick="shareWhatsApp()" class="share-btn share-wa">📱 WhatsApp</button>
                     <button onclick="shareLinkedIn()" class="share-btn share-li">💼 LinkedIn</button>
-                    <button onclick="copyShareLink()" class="share-btn share-copy" id="copy-btn">🔗 Copy Link</button>
+                    <button onclick="copyShareLink()" class="share-btn share-copy" id="copy-btn">🔗 Copy Results</button>
                 </div>
             </div>
 
             <!-- CTA -->
             <div class="cta-section">
                 <p class="cta-title">Want to master diamonds professionally?</p>
-                <p class="cta-sub">IGI School of Gemology offers world-recognized courses in Diamond Grading, Gemology, and Jewelry Design — available online and at centers across India.</p>
+                <p class="cta-sub">IGI's Schools of Gemology offer globally-recognized courses in Diamond Grading, Gemology and Jewelry Design – available online and in gemstone and jewelry hubs around the world.</p>
                 <div class="cta-buttons">
                     <a href="https://igi.org/india/courses" target="_blank" class="btn-cta btn-cta-primary">Explore IGI Courses →</a>
-                    <a href="https://igi.org/india/contact" target="_blank" class="btn-cta btn-cta-secondary">Talk to a Counsellor</a>
+                    <a href="https://igi.org/india/contact" target="_blank" class="btn-cta btn-cta-secondary">Talk to an IGI Team Member</a>
                 </div>
             </div>
 

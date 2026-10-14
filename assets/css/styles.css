@@ -700,3 +700,134 @@ footer {
 }
 .consent-label a { color: #0D1B2E; text-decoration: underline; }
 .consent-label a:hover { color: #C9A84C; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PREMIUM REFINEMENT LAYER — 2026-10-14
+   Appended last so it overrides the original rules without rewriting them.
+   Direction: one ground, one accent, no ornament. The page was reading as
+   "busy" because it stacked a teal gradient band, a floating emoji, gold
+   display type on teal, emoji badge chips and a gradient pill CTA. Premium
+   here means restraint: a single deep navy ground, white display type, gold
+   used only for a hairline eyebrow, numerals and the CTA, and real whitespace.
+   Palette matches the IGI portal (navy #0D1B2E, gold #C9A84C).
+   ═══════════════════════════════════════════════════════════════════════ */
+:root{
+  --ink:#0A1220; --ink-2:#0E1829; --ink-3:#121F33;
+  --line:rgba(255,255,255,.08); --line-gold:rgba(201,168,76,.30);
+  --txt:#EEF1F5; --txt-2:#8E9DB2; --txt-3:#6B7A8F;
+  --gold:#C9A84C; --gold-2:#E2CC8E;
+}
+
+html,body{background:var(--ink);color:var(--txt);
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
+
+/* ── Header: drop the banded teal gradient and the hard gold rule ── */
+header{background:var(--ink)!important;border-bottom:1px solid var(--line)!important;
+  padding:44px 20px 40px!important;}
+.header-diamond{display:none!important;}          /* floating emoji removed */
+.logo-container{position:static!important;margin:0 auto 26px!important;
+  display:flex;justify-content:center;}
+.logo{width:92px!important;opacity:.95;}
+
+/* Institute name becomes a quiet eyebrow; the quiz title carries the page. */
+header h1{font-family:'DM Sans',sans-serif!important;font-size:.68rem!important;
+  font-weight:600!important;letter-spacing:.34em!important;text-transform:uppercase;
+  color:var(--gold)!important;display:flex;align-items:center;justify-content:center;
+  gap:16px;margin-bottom:18px!important;}
+header h1::before,header h1::after{content:"";width:46px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--line-gold),transparent);}
+header h2{font-size:clamp(2.2rem,5vw,3.3rem)!important;color:var(--txt)!important;
+  font-weight:600!important;line-height:1.1!important;letter-spacing:-.01em;}
+.subtitle{font-family:'DM Sans',sans-serif!important;font-size:.95rem!important;
+  letter-spacing:.01em!important;text-transform:none!important;color:var(--txt-2)!important;
+  margin-top:12px!important;}
+
+/* ── Surfaces: almost invisible, no heavy shadow or glow ── */
+.card,.hero-card{background:var(--ink-2)!important;border:1px solid var(--line)!important;
+  border-radius:4px!important;box-shadow:none!important;padding:44px 40px!important;}
+
+/* ── Stats: hairline-separated, no inner box ── */
+.hero-stats{background:transparent!important;border:0!important;
+  border-top:1px solid var(--line)!important;border-bottom:1px solid var(--line)!important;
+  border-radius:0!important;padding:26px 0!important;margin:30px 0!important;}
+.hero-stat-num{color:var(--gold)!important;font-weight:400!important;font-size:2.1rem!important;}
+.hero-stat-label{color:var(--txt-3)!important;letter-spacing:.2em!important;font-size:.62rem!important;}
+.hero-stat-divider{background:var(--line)!important;}
+
+.hero-desc{color:var(--txt-2)!important;font-size:1rem!important;line-height:1.85!important;
+  max-width:50ch;margin-left:auto;margin-right:auto;}
+.hero-note,.note{color:var(--txt-3)!important;font-size:.72rem!important;letter-spacing:.08em;}
+
+/* ── Badge chips: hairline outline, no fill, no emoji ── */
+.badge-preview{gap:0!important;margin:26px 0 30px!important;}
+.bp{background:transparent!important;border:0!important;border-radius:0!important;
+  color:var(--txt-3)!important;font-size:.68rem!important;letter-spacing:.16em!important;
+  text-transform:uppercase;padding:0 18px!important;position:relative;}
+.bp + .bp::before{content:"";position:absolute;left:0;top:50%;transform:translateY(-50%);
+  width:1px;height:11px;background:var(--line);}
+
+/* ── Buttons: flat, square, confident. No gradient, no glow. ── */
+.btn-primary,.btn-cta-primary,.btn-course,.btn-retake{
+  background:var(--gold)!important;background-image:none!important;color:#0A1220!important;
+  border:1px solid var(--gold)!important;border-radius:2px!important;
+  font-family:'DM Sans',sans-serif!important;font-size:.76rem!important;font-weight:700!important;
+  letter-spacing:.17em!important;text-transform:uppercase!important;
+  padding:16px 42px!important;box-shadow:none!important;transition:background .22s,color .22s;}
+.btn-primary:hover,.btn-cta-primary:hover,.btn-course:hover,.btn-retake:hover{
+  background:var(--gold-2)!important;transform:none!important;box-shadow:none!important;}
+.btn-cta-secondary,.share-btn{background:transparent!important;color:var(--txt)!important;
+  border:1px solid var(--line)!important;border-radius:2px!important;box-shadow:none!important;
+  letter-spacing:.14em;text-transform:uppercase;font-size:.72rem;}
+.btn-cta-secondary:hover,.share-btn:hover{border-color:var(--gold)!important;color:var(--gold)!important;}
+
+/* ── Form: quieter labels, hairline fields, gold focus ── */
+.form-group label{font-size:.64rem!important;letter-spacing:.18em!important;
+  color:var(--txt-3)!important;font-weight:600!important;}
+.form-group input,.form-group select{background:var(--ink-3)!important;
+  border:1px solid var(--line)!important;border-radius:2px!important;
+  color:var(--txt)!important;padding:13px 15px!important;font-size:.92rem!important;}
+.form-group input::placeholder{color:#55657A!important;}
+.form-group input:focus,.form-group select:focus{border-color:var(--gold)!important;
+  box-shadow:none!important;outline:none;}
+
+/* ── Consent block — FIX. It was inheriting .form-group label's uppercase and
+   carried link colours written for a light background, so on this dark page the
+   links were near-invisible and the whole paragraph shouted. ── */
+.form-group.consent-group,.consent-group{margin-top:22px!important;}
+.consent-group .consent-label,.form-group.consent-group label{
+  display:flex!important;align-items:flex-start!important;gap:12px!important;
+  text-transform:none!important;letter-spacing:.005em!important;
+  font-size:.8rem!important;line-height:1.65!important;font-weight:400!important;
+  color:var(--txt-2)!important;text-align:left!important;cursor:pointer;}
+.consent-group .consent-label input[type="checkbox"]{
+  appearance:none;-webkit-appearance:none;flex:0 0 auto;width:16px;height:16px;margin-top:3px;
+  border:1px solid var(--txt-3);border-radius:2px;background:transparent;cursor:pointer;
+  transition:background .18s,border-color .18s;}
+.consent-group .consent-label input[type="checkbox"]:checked{
+  background:var(--gold);border-color:var(--gold);}
+.consent-group .consent-label input[type="checkbox"]:checked::after{
+  content:"";display:block;width:4px;height:8px;margin:1px auto 0;
+  border:solid #0A1220;border-width:0 2px 2px 0;transform:rotate(45deg);}
+.consent-group .consent-label a{color:var(--gold)!important;text-decoration:underline;
+  text-underline-offset:2px;}
+.consent-group .consent-label a:hover{color:var(--gold-2)!important;}
+
+/* ── OTP, review, course, share: strip ornament ── */
+.otp-icon{display:none!important;}
+.otp-box{background:var(--ink-3)!important;border:1px solid var(--line)!important;
+  border-radius:2px!important;color:var(--txt)!important;}
+.otp-box:focus{border-color:var(--gold)!important;}
+.review-title,.course-title,.cta-title,.share-title{color:var(--txt)!important;}
+.result-badge{border-radius:2px!important;letter-spacing:.14em;text-transform:uppercase;
+  font-size:.74rem!important;}
+.timer-box{background:transparent!important;border:1px solid var(--line)!important;
+  border-radius:2px!important;}
+
+/* ── Premium layer: spacing corrections, 2026-10-14 ── */
+.card > *:first-child{margin-top:0!important;}
+.hero-card .hero-stats:first-child{margin-top:0!important;padding-top:0!important;
+  border-top:0!important;}
+header{padding:40px 20px 36px!important;}
+.hero-card{padding-top:34px!important;}
+footer,.site-footer,.page-footer{border-top:1px solid var(--line)!important;
+  background:var(--ink)!important;box-shadow:none!important;}

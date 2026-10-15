@@ -700,169 +700,292 @@ footer {
 }
 .consent-label a { color: #0D1B2E; text-decoration: underline; }
 .consent-label a:hover { color: #C9A84C; }
-
 /* ═══════════════════════════════════════════════════════════════════════
-   PREMIUM REFINEMENT LAYER — 2026-10-14
-   Appended last so it overrides the original rules without rewriting them.
-   Direction: one ground, one accent, no ornament. The page was reading as
-   "busy" because it stacked a teal gradient band, a floating emoji, gold
-   display type on teal, emoji badge chips and a gradient pill CTA. Premium
-   here means restraint: a single deep navy ground, white display type, gold
-   used only for a hairline eyebrow, numerals and the CTA, and real whitespace.
-   Palette matches the IGI portal (navy #0D1B2E, gold #C9A84C).
+   LIGHT PREMIUM LAYER + MOTION — 2026-10-15
+   Replaces the dark layer of 2026-10-14. The dark ground was reading as
+   heavy rather than premium, and it fought every form control on the page.
+   This moves to warm ivory paper with navy type and gold accents — closer
+   to an IGI certificate than to a tech product — and adds restrained
+   motion: shapes that drift and morph behind the hero, panels that ease
+   in as they appear, and a score that resolves rather than snaps.
+
+   All motion is CSS/SVG. No library, no video, nothing that delays the
+   Start button, and everything collapses under prefers-reduced-motion.
    ═══════════════════════════════════════════════════════════════════════ */
 :root{
-  --ink:#0A1220; --ink-2:#0E1829; --ink-3:#121F33;
-  --line:rgba(255,255,255,.08); --line-gold:rgba(201,168,76,.30);
-  --txt:#EEF1F5; --txt-2:#8E9DB2; --txt-3:#6B7A8F;
-  --gold:#C9A84C; --gold-2:#E2CC8E;
+  --paper:#FBF9F4;        /* warm ivory ground            */
+  --paper-2:#FFFFFF;      /* card surface                 */
+  --paper-3:#F4F1EA;      /* inset / field fill           */
+  --ink:#0D1B2E;          /* IGI navy — primary type      */
+  --ink-2:#1B2B40;
+  --txt:#0D1B2E;
+  --txt-2:#51627A;        /* secondary copy               */
+  --txt-3:#7F8EA3;        /* labels, meta                 */
+  --line:rgba(13,27,46,.12);
+  --line-2:rgba(13,27,46,.07);
+  --gold:#C9A84C;         /* fills, rules, CTA            */
+  --gold-2:#B08D2E;       /* hover                        */
+  --gold-ink:#8A6A18;     /* gold AS TEXT — darkened so it
+                             clears 4.5:1 on ivory        */
+  --ok:#2F7A4F;
+  --bad:#B3261E;
 }
 
-html,body{background:var(--ink);color:var(--txt);
-  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
+/* ── Ground ─────────────────────────────────────────────────────────── */
+html,body{background:var(--paper)!important;}
+body{color:var(--txt)!important;}
+.page-wrap{background:transparent!important;}
+#particle-canvas{display:none!important;}
+body::before,body::after{display:none!important;}
+.header-diamond,.otp-icon,.toast-emoji{display:none!important;}
 
-/* ── Header: drop the banded teal gradient and the hard gold rule ── */
-header{background:var(--ink)!important;border-bottom:1px solid var(--line)!important;
-  padding:44px 20px 40px!important;}
-.header-diamond{display:none!important;}          /* floating emoji removed */
-.logo-container{position:static!important;margin:0 auto 26px!important;
-  display:flex;justify-content:center;}
-.logo{width:92px!important;opacity:.95;}
+/* ── Hero band: the one place motion lives ──────────────────────────── */
+header,.page-wrap>.quiz-header{
+  background:transparent!important;border-bottom:1px solid var(--line-2)!important;
+  padding:44px 20px 40px!important;position:relative!important;overflow:hidden!important;
+  box-shadow:none!important;}
+/* Two soft shapes that morph and drift. border-radius animation gives a
+   seamless blob/gem transition with no SVG and no JS. */
+header::before,.page-wrap>.quiz-header::before,
+header::after,.page-wrap>.quiz-header::after{
+  content:""!important;position:absolute!important;display:block!important;
+  pointer-events:none;z-index:0;filter:blur(46px);opacity:.9;}
+header::before,.page-wrap>.quiz-header::before{
+  width:560px;height:560px;top:-230px;left:50%;margin-left:-440px;
+  background:radial-gradient(circle at 50% 50%,rgba(201,168,76,.22) 0%,rgba(201,168,76,.10) 45%,rgba(201,168,76,0) 72%);
+  border-radius:58% 42% 47% 53%/44% 51% 49% 56%;
+  animation:igiMorphA 26s ease-in-out infinite;}
+header::after,.page-wrap>.quiz-header::after{
+  width:480px;height:480px;top:-180px;left:50%;margin-left:30px;
+  background:radial-gradient(circle at 50% 50%,rgba(13,27,46,.09) 0%,rgba(13,27,46,.04) 48%,rgba(13,27,46,0) 74%);
+  border-radius:45% 55% 60% 40%/52% 45% 55% 48%;
+  animation:igiMorphB 32s ease-in-out infinite;}
+@keyframes igiMorphA{
+  0%,100%{border-radius:58% 42% 47% 53%/44% 51% 49% 56%;transform:translate3d(0,0,0) rotate(0deg) scale(1);}
+  33%    {border-radius:44% 56% 62% 38%/55% 42% 58% 45%;transform:translate3d(22px,16px,0) rotate(7deg) scale(1.06);}
+  66%    {border-radius:63% 37% 40% 60%/39% 60% 40% 61%;transform:translate3d(-14px,10px,0) rotate(-5deg) scale(.97);}}
+@keyframes igiMorphB{
+  0%,100%{border-radius:45% 55% 60% 40%/52% 45% 55% 48%;transform:translate3d(0,0,0) rotate(0deg) scale(1);}
+  50%    {border-radius:60% 40% 42% 58%/45% 58% 42% 55%;transform:translate3d(-26px,14px,0) rotate(-8deg) scale(1.08);}}
+header>*,.page-wrap>.quiz-header>*{position:relative;z-index:1;}
 
-/* Institute name becomes a quiet eyebrow; the quiz title carries the page. */
-header h1{font-family:'DM Sans',sans-serif!important;font-size:.68rem!important;
-  font-weight:600!important;letter-spacing:.34em!important;text-transform:uppercase;
-  color:var(--gold)!important;display:flex;align-items:center;justify-content:center;
-  gap:16px;margin-bottom:18px!important;}
-header h1::before,header h1::after{content:"";width:46px;height:1px;
-  background:linear-gradient(90deg,transparent,var(--line-gold),transparent);}
-header h2{font-size:clamp(2.2rem,5vw,3.3rem)!important;color:var(--txt)!important;
-  font-weight:600!important;line-height:1.1!important;letter-spacing:-.01em;}
-.subtitle{font-family:'DM Sans',sans-serif!important;font-size:.95rem!important;
-  letter-spacing:.01em!important;text-transform:none!important;color:var(--txt-2)!important;
-  margin-top:12px!important;}
+/* Institute name = small-caps gold eyebrow between hairlines */
+header h1,.page-wrap>.quiz-header .eyebrow{
+  font-family:'DM Sans',sans-serif!important;font-size:.68rem!important;
+  letter-spacing:.3em!important;text-transform:uppercase!important;
+  color:var(--gold-ink)!important;font-weight:700!important;
+  margin:0 0 18px!important;display:flex!important;align-items:center;
+  justify-content:center;gap:16px;text-shadow:none!important;}
+header h1::before,header h1::after,
+.page-wrap>.quiz-header .eyebrow::before,.page-wrap>.quiz-header .eyebrow::after{
+  content:"";width:46px;height:1px;background:var(--gold);opacity:.5;flex:0 0 auto;}
+/* Display title */
+header h2,.page-wrap>.quiz-header h1{
+  font-size:clamp(2.1rem,5vw,3.2rem)!important;color:var(--ink)!important;
+  letter-spacing:-.015em!important;line-height:1.1!important;margin:0 0 14px!important;
+  text-shadow:none!important;}
+header h2 em,.page-wrap>.quiz-header h1 em{color:var(--gold-ink)!important;font-style:italic;}
+.subtitle,.tagline{color:var(--txt-2)!important;font-size:1rem!important;}
 
-/* ── Surfaces: almost invisible, no heavy shadow or glow ── */
-.card,.hero-card{background:var(--ink-2)!important;border:1px solid var(--line)!important;
-  border-radius:4px!important;box-shadow:none!important;padding:44px 40px!important;}
+/* ── Cards ──────────────────────────────────────────────────────────── */
+.card,.hero-card{
+  background:var(--paper-2)!important;border:1px solid var(--line)!important;
+  border-radius:6px!important;box-shadow:0 1px 2px rgba(13,27,46,.04),0 8px 28px rgba(13,27,46,.05)!important;
+  padding:44px 40px!important;}
+.card>*:first-child{margin-top:0!important;}
+.hero-card{padding-top:34px!important;}
+h3,.course-title,.share-title,.cta-title,.review-title,.otp-header{color:var(--ink)!important;}
+p,.hero-desc,.reg-sub,.cta-sub,.share-sub,.otp-sub,.course-sub,.course-box-sub{color:var(--txt-2)!important;}
+.hero-desc{font-size:1rem!important;line-height:1.85!important;max-width:50ch!important;}
+.hero-note,.form-note,.note,.otp-note{color:var(--txt-3)!important;font-size:.72rem!important;}
 
-/* ── Stats: hairline-separated, no inner box ── */
-.hero-stats{background:transparent!important;border:0!important;
-  border-top:1px solid var(--line)!important;border-bottom:1px solid var(--line)!important;
-  border-radius:0!important;padding:26px 0!important;margin:30px 0!important;}
-.hero-stat-num{color:var(--gold)!important;font-weight:400!important;font-size:2.1rem!important;}
+/* ── Stats row ──────────────────────────────────────────────────────── */
+.hero-stats{background:transparent!important;border:0!important;border-top:1px solid var(--line-2)!important;
+  border-bottom:1px solid var(--line-2)!important;border-radius:0!important;
+  padding:26px 0!important;margin:30px 0!important;box-shadow:none!important;}
+.hero-card .hero-stats:first-child{margin-top:0!important;padding-top:0!important;border-top:0!important;}
+.hero-stat-num{color:var(--gold-ink)!important;font-weight:400!important;}
 .hero-stat-label{color:var(--txt-3)!important;letter-spacing:.2em!important;font-size:.62rem!important;}
 .hero-stat-divider{background:var(--line)!important;}
 
-.hero-desc{color:var(--txt-2)!important;font-size:1rem!important;line-height:1.85!important;
-  max-width:50ch;margin-left:auto;margin-right:auto;}
-.hero-note,.note{color:var(--txt-3)!important;font-size:.72rem!important;letter-spacing:.08em;}
-
-/* ── Badge chips: hairline outline, no fill, no emoji ── */
-.badge-preview{gap:0!important;margin:26px 0 30px!important;}
+/* ── Badge chips / gem pills: hairline-separated small caps ─────────── */
+.badge-preview{gap:0!important;margin-bottom:32px!important;flex-wrap:nowrap!important;justify-content:center!important;}
 .bp{background:transparent!important;border:0!important;border-radius:0!important;
-  color:var(--txt-3)!important;font-size:.68rem!important;letter-spacing:.16em!important;
-  text-transform:uppercase;padding:0 18px!important;position:relative;}
+  color:var(--txt-3)!important;font-size:.64rem!important;letter-spacing:.12em!important;
+  text-transform:uppercase;padding:0 13px!important;position:relative;white-space:nowrap!important;}
 .bp + .bp::before{content:"";position:absolute;left:0;top:50%;transform:translateY(-50%);
   width:1px;height:11px;background:var(--line);}
+.hero-gem-row{gap:0!important;flex-wrap:wrap!important;justify-content:center!important;}
+.gem-pill,.gem-pill.ruby,.gem-pill.sapp,.gem-pill.emer,.gem-pill.ameth,.gem-pill.topaz{
+  background:transparent!important;border:0!important;box-shadow:none!important;
+  color:var(--txt-3)!important;font-size:.66rem!important;letter-spacing:.16em!important;
+  text-transform:uppercase!important;padding:0 16px!important;position:relative;}
+.gem-pill + .gem-pill::before{content:"";position:absolute;left:0;top:50%;transform:translateY(-50%);
+  width:1px;height:11px;background:var(--line);}
+@media (max-width:640px){
+  .badge-preview{flex-wrap:wrap!important;gap:6px 0!important;}
+  .bp{padding:0 10px!important;} .bp + .bp::before{display:none!important;}
+  .gem-pill{padding:0 10px!important;} .gem-pill + .gem-pill::before{display:none!important;}
+}
 
-/* ── Buttons: flat, square, confident. No gradient, no glow. ── */
-.btn-primary,.btn-cta-primary,.btn-course,.btn-retake{
-  background:var(--gold)!important;background-image:none!important;color:#0A1220!important;
-  border:1px solid var(--gold)!important;border-radius:2px!important;
-  font-family:'DM Sans',sans-serif!important;font-size:.76rem!important;font-weight:700!important;
-  letter-spacing:.17em!important;text-transform:uppercase!important;
-  padding:16px 42px!important;box-shadow:none!important;transition:background .22s,color .22s;}
-.btn-primary:hover,.btn-cta-primary:hover,.btn-course:hover,.btn-retake:hover{
-  background:var(--gold-2)!important;transform:none!important;box-shadow:none!important;}
-.btn-cta-secondary,.share-btn{background:transparent!important;color:var(--txt)!important;
-  border:1px solid var(--line)!important;border-radius:2px!important;box-shadow:none!important;
-  letter-spacing:.14em;text-transform:uppercase;font-size:.72rem;}
-.btn-cta-secondary:hover,.share-btn:hover{border-color:var(--gold)!important;color:var(--gold)!important;}
+/* ── Buttons: flat gold, square, navy label ─────────────────────────── */
+.btn-primary,.btn-large,.btn-course,.btn-retake,.btn-cta-primary,.btn-nav-submit{
+  background:var(--gold)!important;background-image:none!important;color:var(--ink)!important;
+  border:1px solid var(--gold)!important;border-radius:3px!important;
+  font-size:.76rem!important;font-weight:700!important;letter-spacing:.17em!important;
+  text-transform:uppercase!important;padding:16px 42px!important;
+  box-shadow:none!important;transition:background .2s ease,transform .2s ease;}
+.btn-primary:hover,.btn-large:hover,.btn-course:hover,.btn-retake:hover,
+.btn-cta-primary:hover,.btn-nav-submit:hover{
+  background:var(--gold-2)!important;border-color:var(--gold-2)!important;
+  transform:translateY(-1px)!important;box-shadow:0 6px 18px rgba(176,141,46,.22)!important;}
+.btn-cta-secondary,.btn-outline,.btn-nav,.otp-back-btn,.share-btn{
+  background:transparent!important;color:var(--ink)!important;
+  border:1px solid var(--line)!important;border-radius:3px!important;
+  font-weight:600!important;letter-spacing:.1em!important;box-shadow:none!important;
+  transition:border-color .2s ease,background .2s ease;}
+.btn-cta-secondary:hover,.btn-outline:hover,.btn-nav:hover,.otp-back-btn:hover,.share-btn:hover{
+  border-color:var(--gold)!important;background:rgba(201,168,76,.07)!important;}
 
-/* ── Form: quieter labels, hairline fields, gold focus ── */
+/* ── Forms ──────────────────────────────────────────────────────────── */
 .form-group label{font-size:.64rem!important;letter-spacing:.18em!important;
-  color:var(--txt-3)!important;font-weight:600!important;}
-.form-group input:not([type="checkbox"]),.form-group select{background:var(--ink-3)!important;
-  border:1px solid var(--line)!important;border-radius:2px!important;
-  color:var(--txt)!important;padding:13px 15px!important;font-size:.92rem!important;}
-.form-group input::placeholder{color:#55657A!important;}
-.form-group input:focus,.form-group select:focus{border-color:var(--gold)!important;
-  box-shadow:none!important;outline:none;}
+  text-transform:uppercase!important;color:var(--txt-3)!important;font-weight:600!important;}
+.form-group input:not([type="checkbox"]),.form-group select,.otp-box,.course-select{
+  background:var(--paper-3)!important;border:1px solid var(--line)!important;
+  border-radius:3px!important;color:var(--ink)!important;
+  padding:13px 15px!important;font-size:.92rem!important;box-shadow:none!important;
+  transition:border-color .18s ease,background .18s ease;}
+.form-group input::placeholder{color:#9AA7B8!important;}
+.form-group input:not([type="checkbox"]):focus,.form-group select:focus,
+.otp-box:focus,.course-select:focus{
+  border-color:var(--gold)!important;background:var(--paper-2)!important;
+  box-shadow:0 0 0 3px rgba(201,168,76,.15)!important;outline:none!important;}
 
-/* ── Consent block — FIX. It was inheriting .form-group label's uppercase and
-   carried link colours written for a light background, so on this dark page the
-   links were near-invisible and the whole paragraph shouted. ── */
-.form-group.consent-group,.consent-group{margin-top:22px!important;}
+/* Consent block — sentence case, readable, gold links */
 .consent-group .consent-label,.form-group.consent-group label{
   display:flex!important;align-items:flex-start!important;gap:12px!important;
   text-transform:none!important;letter-spacing:.005em!important;
   font-size:.8rem!important;line-height:1.65!important;font-weight:400!important;
   color:var(--txt-2)!important;text-align:left!important;cursor:pointer;}
-.consent-group .consent-label input[type="checkbox"]{
-  appearance:none;-webkit-appearance:none;flex:0 0 auto;width:16px;height:16px;margin-top:3px;
-  border:1px solid var(--txt-3);border-radius:2px;background:transparent;cursor:pointer;
-  transition:background .18s,border-color .18s;}
-.consent-group .consent-label input[type="checkbox"]:checked{
-  background:var(--gold);border-color:var(--gold);}
-.consent-group .consent-label input[type="checkbox"]:checked::after{
-  content:"";display:block;width:4px;height:8px;margin:1px auto 0;
-  border:solid #0A1220;border-width:0 2px 2px 0;transform:rotate(45deg);}
-.consent-group .consent-label a{color:var(--gold)!important;text-decoration:underline;
+.consent-group .consent-label a{color:var(--gold-ink)!important;text-decoration:underline;
   text-underline-offset:2px;}
 .consent-group .consent-label a:hover{color:var(--gold-2)!important;}
-
-/* ── OTP, review, course, share: strip ornament ── */
-.otp-icon{display:none!important;}
-.otp-box{background:var(--ink-3)!important;border:1px solid var(--line)!important;
-  border-radius:2px!important;color:var(--txt)!important;}
-.otp-box:focus{border-color:var(--gold)!important;}
-.review-title,.course-title,.cta-title,.share-title{color:var(--txt)!important;}
-.result-badge{border-radius:2px!important;letter-spacing:.14em;text-transform:uppercase;
-  font-size:.74rem!important;}
-.timer-box{background:transparent!important;border:1px solid var(--line)!important;
-  border-radius:2px!important;}
-
-/* ── Premium layer: spacing corrections, 2026-10-14 ── */
-.card > *:first-child{margin-top:0!important;}
-.hero-card .hero-stats:first-child{margin-top:0!important;padding-top:0!important;
-  border-top:0!important;}
-header{padding:40px 20px 36px!important;}
-.hero-card{padding-top:34px!important;}
-footer,.site-footer,.page-footer{border-top:1px solid var(--line)!important;
-  background:var(--ink)!important;box-shadow:none!important;}
-
-
-/* ── Consent checkbox — FIX 2026-10-15 ───────────────────────────────────
-   .consent-group IS a .form-group, so the generic `.form-group input` rule
-   above (all !important) was giving the checkbox 13px of padding and the dark
-   field background: it rendered 32x28px, and ticking it only changed the
-   border colour, so on this dark page a checked box looked identical to an
-   unchecked one. The generic rule now skips checkboxes, and the box below
-   fills solid gold with a dark tick so the checked state is unmistakable. */
+/* The box itself. .consent-group IS a .form-group, so without this the
+   generic input rule above would size and fill it like a text field. */
 .consent-group .consent-label input[type="checkbox"],
 .form-group.consent-group input[type="checkbox"]{
   appearance:none!important;-webkit-appearance:none!important;
   flex:0 0 auto!important;width:19px!important;height:19px!important;
   min-width:19px!important;padding:0!important;margin:1px 0 0!important;
-  border:1.5px solid var(--txt-3)!important;border-radius:3px!important;
-  background:transparent!important;cursor:pointer!important;
+  border:1.5px solid #9AA7B8!important;border-radius:3px!important;
+  background:var(--paper-2)!important;cursor:pointer!important;
   display:inline-block!important;position:relative!important;
   transition:background .16s ease,border-color .16s ease;}
 .consent-group .consent-label input[type="checkbox"]:hover,
-.form-group.consent-group input[type="checkbox"]:hover{
-  border-color:var(--gold)!important;}
+.form-group.consent-group input[type="checkbox"]:hover{border-color:var(--gold)!important;}
 .consent-group .consent-label input[type="checkbox"]:checked,
 .form-group.consent-group input[type="checkbox"]:checked{
   background:var(--gold)!important;border-color:var(--gold)!important;}
-/* The tick: a rotated corner, drawn in the page's darkest navy so it reads
-   clearly against the gold fill. */
 .consent-group .consent-label input[type="checkbox"]:checked::after,
 .form-group.consent-group input[type="checkbox"]:checked::after{
   content:""!important;position:absolute!important;
   left:6px!important;top:2px!important;width:5px!important;height:10px!important;
-  border:solid #0A1220!important;border-width:0 2.5px 2.5px 0!important;
+  border:solid var(--ink)!important;border-width:0 2.5px 2.5px 0!important;
   transform:rotate(45deg)!important;}
 .consent-group .consent-label input[type="checkbox"]:focus-visible,
 .form-group.consent-group input[type="checkbox"]:focus-visible{
   outline:2px solid var(--gold)!important;outline-offset:2px!important;}
+
+/* ── Quiz screen ────────────────────────────────────────────────────── */
+.question-card{background:var(--paper-2)!important;border:1px solid var(--line)!important;
+  border-radius:6px!important;box-shadow:0 8px 28px rgba(13,27,46,.05)!important;}
+.question-text{color:var(--ink)!important;}
+.q-num,.q-meta{color:var(--txt-3)!important;}
+.options label,.options .option{background:var(--paper-3)!important;
+  border:1px solid var(--line)!important;border-radius:4px!important;color:var(--ink)!important;
+  transition:border-color .18s ease,background .18s ease,transform .18s ease;}
+.options label:hover,.options .option:hover{border-color:var(--gold)!important;
+  background:rgba(201,168,76,.08)!important;transform:translateX(2px);}
+.options input:checked + label,.options label.selected,.options .option.selected{
+  border-color:var(--gold)!important;background:rgba(201,168,76,.14)!important;}
+.option-dot{border-color:var(--txt-3)!important;}
+.timer-box{background:transparent!important;border:1px solid var(--line)!important;
+  border-radius:3px!important;}
+.timer-label{color:var(--txt-3)!important;} .timer-value{color:var(--ink)!important;}
+.global-progress{background:var(--line-2)!important;}
+.global-progress-fill,.q-progress-mini-fill{background:var(--gold)!important;
+  transition:width .45s cubic-bezier(.4,0,.2,1)!important;}
+.q-progress-mini{background:var(--line-2)!important;}
+.nav-dots .option-dot,.nav-dots span{background:var(--line)!important;}
+
+/* ── Results ────────────────────────────────────────────────────────── */
+.result-badge{border-radius:3px!important;letter-spacing:.14em;text-transform:uppercase;
+  font-size:.74rem!important;background:rgba(201,168,76,.16)!important;
+  color:var(--gold-ink)!important;border:1px solid var(--gold)!important;}
+.result-grid{border-top:1px solid var(--line-2)!important;border-bottom:1px solid var(--line-2)!important;
+  background:transparent!important;}
+.result-item{background:transparent!important;border:0!important;}
+.result-value{color:var(--ink)!important;} .result-label{color:var(--txt-3)!important;}
+.answer-review,.review-answers{background:var(--paper-3)!important;border:1px solid var(--line)!important;
+  border-radius:4px!important;}
+.review-q{color:var(--ink)!important;}
+.review-correct,.correct-ans{color:var(--ok)!important;}
+.review-given{color:var(--bad)!important;}
+.cta-section,.cta-box,.share-section,.share-box,.course-interest,.course-box,.otp-section{
+  background:var(--paper-2)!important;border:1px solid var(--line)!important;border-radius:6px!important;}
+footer,.site-footer{border-top:1px solid var(--line-2)!important;background:transparent!important;
+  color:var(--txt-3)!important;box-shadow:none!important;}
+footer a{color:var(--gold-ink)!important;}
+.toast{background:var(--ink)!important;color:#fff!important;border-radius:4px!important;}
+
+/* ── Motion: panels ease in as they appear ──────────────────────────── */
+@keyframes igiRise{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+@keyframes igiFade{from{opacity:0;}to{opacity:1;}}
+section.card:not(.hidden),.question-card{
+  animation:igiRise .5s cubic-bezier(.22,.8,.3,1) both;}
+header h1,.page-wrap>.quiz-header .eyebrow{animation:igiFade .7s ease .05s both;}
+header h2,.page-wrap>.quiz-header h1{animation:igiRise .7s cubic-bezier(.22,.8,.3,1) .12s both;}
+.subtitle,.tagline{animation:igiRise .7s cubic-bezier(.22,.8,.3,1) .2s both;}
+/* Score resolves rather than snaps */
+@keyframes igiScore{from{opacity:0;transform:scale(.9);}to{opacity:1;transform:none;}}
+.result-badge,.result-value{animation:igiScore .6s cubic-bezier(.22,.8,.3,1) both;}
+.result-item:nth-child(2) .result-value{animation-delay:.08s;}
+.result-item:nth-child(3) .result-value{animation-delay:.16s;}
+.result-item:nth-child(4) .result-value{animation-delay:.24s;}
+
+/* ── Anyone who asks for less motion gets none of it ────────────────── */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms!important;animation-iteration-count:1!important;
+    transition-duration:.001ms!important;scroll-behavior:auto!important;}
+  header::before,.page-wrap>.quiz-header::before,header::after,.page-wrap>.quiz-header::after{display:none!important;}
+}
+
+
+/* ── Diamond quiz: the in-quiz timer bar also uses .quiz-header ─────────
+   Same class as the page hero, so it has to be excluded from the hero
+   treatment above and styled as the quiet strip it actually is. */
+#quiz-section .quiz-header{
+  background:transparent!important;border:0!important;border-bottom:1px solid var(--line-2)!important;
+  border-radius:0!important;padding:0 0 14px!important;margin:0 0 18px!important;
+  overflow:visible!important;box-shadow:none!important;min-height:0!important;}
+#quiz-section .quiz-header::before,#quiz-section .quiz-header::after{display:none!important;}
+/* Question counter pill + progress track (diamond's own class names) */
+.question-number{
+  background:rgba(201,168,76,.16)!important;color:var(--gold-ink)!important;
+  border:1px solid rgba(201,168,76,.45)!important;border-radius:3px!important;
+  letter-spacing:.12em!important;}
+.question-progress{background:var(--line-2)!important;border-radius:2px!important;}
+.question-progress-bar{background:var(--gold)!important;border-radius:2px!important;
+  transition:width .45s cubic-bezier(.4,0,.2,1)!important;}
+.option-label{background:var(--paper-3)!important;border:1px solid var(--line)!important;
+  color:var(--ink)!important;border-radius:4px!important;
+  transition:border-color .18s ease,background .18s ease,transform .18s ease;}
+.option-label:hover{border-color:var(--gold)!important;background:rgba(201,168,76,.08)!important;
+  transform:translateX(2px);}
+.option-label.selected,input:checked+.option-label{
+  border-color:var(--gold)!important;background:rgba(201,168,76,.14)!important;}
+.dot{background:var(--line)!important;}
+.dot.answered{background:var(--gold)!important;}
+.otp-box.filled{border-color:var(--gold)!important;background:var(--paper-2)!important;}
+.otp-resend{color:var(--gold-ink)!important;}

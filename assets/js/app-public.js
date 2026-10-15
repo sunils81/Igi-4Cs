@@ -640,7 +640,7 @@ function copyShareLink() {
     navigator.clipboard.writeText(text).then(() => {
         const btn = document.getElementById('copy-btn');
         btn.textContent = 'Copied!';
-        setTimeout(() => { btn.textContent = '🔗 Copy Results'; }, 2500);
+        setTimeout(() => { btn.textContent = ' Copy Results'; }, 2500);
     }).catch(() => {
         alert('Copy this link: ' + QUIZ_URL);
     });

@@ -783,7 +783,7 @@ header h2{font-size:clamp(2.2rem,5vw,3.3rem)!important;color:var(--txt)!importan
 /* ── Form: quieter labels, hairline fields, gold focus ── */
 .form-group label{font-size:.64rem!important;letter-spacing:.18em!important;
   color:var(--txt-3)!important;font-weight:600!important;}
-.form-group input,.form-group select{background:var(--ink-3)!important;
+.form-group input:not([type="checkbox"]),.form-group select{background:var(--ink-3)!important;
   border:1px solid var(--line)!important;border-radius:2px!important;
   color:var(--txt)!important;padding:13px 15px!important;font-size:.92rem!important;}
 .form-group input::placeholder{color:#55657A!important;}
@@ -831,3 +831,38 @@ header{padding:40px 20px 36px!important;}
 .hero-card{padding-top:34px!important;}
 footer,.site-footer,.page-footer{border-top:1px solid var(--line)!important;
   background:var(--ink)!important;box-shadow:none!important;}
+
+
+/* ── Consent checkbox — FIX 2026-10-15 ───────────────────────────────────
+   .consent-group IS a .form-group, so the generic `.form-group input` rule
+   above (all !important) was giving the checkbox 13px of padding and the dark
+   field background: it rendered 32x28px, and ticking it only changed the
+   border colour, so on this dark page a checked box looked identical to an
+   unchecked one. The generic rule now skips checkboxes, and the box below
+   fills solid gold with a dark tick so the checked state is unmistakable. */
+.consent-group .consent-label input[type="checkbox"],
+.form-group.consent-group input[type="checkbox"]{
+  appearance:none!important;-webkit-appearance:none!important;
+  flex:0 0 auto!important;width:19px!important;height:19px!important;
+  min-width:19px!important;padding:0!important;margin:1px 0 0!important;
+  border:1.5px solid var(--txt-3)!important;border-radius:3px!important;
+  background:transparent!important;cursor:pointer!important;
+  display:inline-block!important;position:relative!important;
+  transition:background .16s ease,border-color .16s ease;}
+.consent-group .consent-label input[type="checkbox"]:hover,
+.form-group.consent-group input[type="checkbox"]:hover{
+  border-color:var(--gold)!important;}
+.consent-group .consent-label input[type="checkbox"]:checked,
+.form-group.consent-group input[type="checkbox"]:checked{
+  background:var(--gold)!important;border-color:var(--gold)!important;}
+/* The tick: a rotated corner, drawn in the page's darkest navy so it reads
+   clearly against the gold fill. */
+.consent-group .consent-label input[type="checkbox"]:checked::after,
+.form-group.consent-group input[type="checkbox"]:checked::after{
+  content:""!important;position:absolute!important;
+  left:6px!important;top:2px!important;width:5px!important;height:10px!important;
+  border:solid #0A1220!important;border-width:0 2.5px 2.5px 0!important;
+  transform:rotate(45deg)!important;}
+.consent-group .consent-label input[type="checkbox"]:focus-visible,
+.form-group.consent-group input[type="checkbox"]:focus-visible{
+  outline:2px solid var(--gold)!important;outline-offset:2px!important;}

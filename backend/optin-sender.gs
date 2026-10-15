@@ -33,7 +33,7 @@ var OPTIN_STAMP_COL  = 'Opt-in Email Sent';
 var QUIZ_NAME        = 'Diamond 4Cs Quiz';     // change in the gemstone copy
 var DAILY_CAP        = 90;
 var FROM_NAME        = 'IGI School of Gemology';
-var REPLY_TO         = 'indiaeducation@igi.org';
+var REPLY_TO         = 'IGIEducation@igi.org';
 
 function sendOptInEmailsDryRun() { _runOptIn(true); }
 function sendOptInEmails()       { _runOptIn(false); }

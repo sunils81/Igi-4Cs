@@ -144,4 +144,4 @@ skipped, and it stops at the daily Gmail cap.
   position. Columns in the Google Sheet may be reordered safely; do not rename the header
   cells, as the script matches on those names.
 
-Questions: Sunil Sharma, Head of Education — indiaeducation@igi.org
+Questions: Sunil Sharma, Head of Education — IGIEducation@igi.org

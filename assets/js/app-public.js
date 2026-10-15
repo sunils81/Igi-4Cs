@@ -146,6 +146,56 @@ document.addEventListener('DOMContentLoaded', () => {
         'Other':        'Your city or region'
     };
 
+
+    /* ── City suggestions — 2026-10-15 ──────────────────────────────────────
+       The city box was free text, so the same place arrived as "Bengaluru",
+       "bangalore" and "Banglore" and the CRM could not route any of them.
+       This backs it with a <datalist>: it drops down and filters as you type,
+       but still accepts anything typed by hand — a lead from a town we do not
+       list must never be blocked from taking the quiz.
+       For India the cities we actually service are listed FIRST, so the
+       common case is one tap and always lands on a routable spelling. */
+    const CITY_LISTS = {
+      'India': [
+        // Cities with an IGI centre — these route straight to a counsellor
+        'Mumbai','Delhi','Bangalore','Chennai','Hyderabad','Kolkata','Pune',
+        'Ahmedabad','Surat','Jaipur','Lucknow','Thrissur','Coimbatore',
+        // Satellites that route to the nearest centre
+        'Navi Mumbai','Thane','New Delhi','Gurugram','Noida','Ghaziabad',
+        'Faridabad','Secunderabad','Howrah',
+        // Other major Indian cities
+        'Agra','Amritsar','Bhopal','Bhubaneswar','Chandigarh','Dehradun','Goa',
+        'Guwahati','Indore','Jamshedpur','Jodhpur','Kanpur','Kochi','Kozhikode',
+        'Ludhiana','Madurai','Mangalore','Mysore','Nagpur','Nashik','Patna',
+        'Raipur','Rajkot','Ranchi','Salem','Thiruvananthapuram','Tiruchirappalli',
+        'Udaipur','Vadodara','Varanasi','Vijayawada','Visakhapatnam'
+      ],
+      'UAE': ['Dubai','Abu Dhabi','Sharjah','Ajman','Ras Al Khaimah','Fujairah'],
+      'USA': ['New York','Los Angeles','Chicago','Miami','Houston','Dallas',
+              'San Francisco','Seattle','Boston','Atlanta','Philadelphia','Las Vegas'],
+      'UK': ['London','Birmingham','Manchester','Leeds','Glasgow','Liverpool','Bristol','Edinburgh'],
+      'Belgium': ['Antwerp','Brussels','Ghent','Bruges','Leuven'],
+      'China': ['Shanghai','Shenzhen','Beijing','Guangzhou','Hong Kong','Hangzhou'],
+      'Hong Kong': ['Central','Kowloon','Causeway Bay','Tsim Sha Tsui','Wan Chai'],
+      'Singapore': ['Orchard','Marina Bay','Jurong','Tampines','Woodlands'],
+      'Australia': ['Sydney','Melbourne','Brisbane','Perth','Adelaide','Canberra'],
+      'Canada': ['Toronto','Vancouver','Montreal','Calgary','Ottawa','Edmonton'],
+      'Japan': ['Tokyo','Osaka','Nagoya','Yokohama','Kyoto','Kobe'],
+      'Israel': ['Tel Aviv','Jerusalem','Haifa','Ramat Gan','Netanya'],
+      'Thailand': ['Bangkok','Chiang Mai','Pattaya','Phuket'],
+      'Turkey': ['Istanbul','Ankara','Izmir','Bursa','Antalya'],
+      'Italy': ['Milan','Vicenza','Rome','Florence','Naples','Turin'],
+      'South Africa': ['Johannesburg','Cape Town','Durban','Pretoria','Port Elizabeth']
+    };
+    function populateCityList(country) {
+      const dl = document.getElementById('city-list');
+      if (!dl) return;
+      const cities = CITY_LISTS[country] || [];
+      dl.innerHTML = cities.map(function(c) {
+        return '<option value="' + c.replace(/"/g, '&quot;') + '"></option>';
+      }).join('');
+    }
+    
     function updateCityField(country) {
         const cityGroup = document.getElementById('city-group');
         const cityLabel = document.getElementById('city-label');
@@ -160,11 +210,13 @@ document.addEventListener('DOMContentLoaded', () => {
             cityLabel.textContent = 'City *';
             cityInput.placeholder = cityPlaceholders['India'];
             cityInput.required = true;
+            populateCityList('India');
         } else {
             cityGroup.style.display = 'flex';
             cityLabel.textContent = 'City / Region (optional)';
             cityInput.placeholder = cityPlaceholders[country] || 'Your city or region';
             cityInput.required = false;
+            populateCityList(country);
         }
     }
 
